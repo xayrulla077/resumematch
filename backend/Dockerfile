@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies + build tools for python packages
+# Install system dependencies + build tools
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     libtesseract-dev \
@@ -20,4 +20,5 @@ COPY . .
 RUN mkdir -p uploads
 
 # Start using gunicorn for production
-CMD gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT --timeout 120
+# Reduced to 1 worker to stay within Render Free Tier memory limits (512MB)
+CMD gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT --timeout 120
