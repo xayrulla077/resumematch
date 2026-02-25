@@ -1,0 +1,28 @@
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+sqlalchemy==2.0.25
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# PDF processing
+PyPDF2==3.0.1
+pdf2image
+pytesseract
+psutil==5.9.8
+bcrypt==4.1.2
+
+# AI & Data
+google-generativeai
+google-auth
+pandas
+openpyxl
+
+# Basic text processing
+nltk==3.8.1
+
+# Production server
+gunicorn==21.2.0
