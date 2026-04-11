@@ -1,29 +1,28 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import os
-from dotenv import load_dotenv
 
-# Load .env from parent directory
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+# Database URL (loading from environment)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# Database URL
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./resume_matcher.db")
+SQLALCHEMY_DATABASE_URL = DATABASE_URL or "sqlite:///./resume_matcher.db"
 
 # Engine yaratish
-if DATABASE_URL.startswith("sqlite"):
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False}
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
     )
-elif DATABASE_URL.startswith("postgresql"):
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 else:
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
+
 
 # Dependency
 def get_db():

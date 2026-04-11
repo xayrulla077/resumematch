@@ -8,6 +8,7 @@ python-dotenv==1.0.0
 pydantic==2.5.3
 pydantic-settings==2.1.0
 email-validator==2.1.0.post1
+slowapi==0.1.9
 
 # PDF processing
 PyPDF2==3.0.1
@@ -19,11 +20,20 @@ bcrypt==4.1.2
 # AI & Data
 google-generativeai
 google-auth
+openai
+fpdf
 pandas
 openpyxl
+reportlab
 
 # Basic text processing
 nltk==3.8.1
 
 # Production server
 gunicorn==21.2.0
+
+# Monitoring
+sentry-sdk[fastapi]
+
+# Email (optional - for notifications)
+jinja2

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { applicationsAPI } from '../services/api';
 import { FileText, Calendar, CheckCircle, Clock, XCircle, AlertCircle, Eye, BrainCircuit, X, Star, Info, Target } from 'lucide-react';
 
 const MyApplications = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedApp, setSelectedApp] = useState(null);
@@ -17,10 +19,12 @@ const MyApplications = () => {
         try {
             setLoading(true);
             const response = await applicationsAPI.getMyApplications();
-            // Backend returns { success: true, data: [...] }
-            setApplications(response.data.data || []);
+            // Backend may return { success: true, data: [...] } or { items: [...] }
+            const apps = response.data?.data || response.data?.items || response.data || [];
+            setApplications(Array.isArray(apps) ? apps : []);
         } catch (error) {
             console.error('Applications load error:', error);
+            setApplications([]);
         } finally {
             setLoading(false);
         }
@@ -37,8 +41,18 @@ const MyApplications = () => {
 
         const b = badges[status] || badges.pending;
 
+        const statusColors = {
+            indigo: 'bg-indigo-500/10 text-indigo-400 border-indigo-400/20 shadow-indigo-500/5',
+            blue: 'bg-blue-500/10 text-blue-400 border-blue-400/20 shadow-blue-500/5',
+            purple: 'bg-purple-500/10 text-purple-400 border-purple-400/20 shadow-purple-500/5',
+            emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-400/20 shadow-emerald-500/5',
+            rose: 'bg-rose-500/10 text-rose-400 border-rose-400/20 shadow-rose-500/5',
+        };
+
+        const colorClasses = statusColors[b.color] || statusColors.indigo;
+
         return (
-            <span className={`px-3 py-1 bg-${b.color}-500/10 text-${b.color}-400 border border-${b.color}-400/20 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-${b.color}-500/5`}>
+            <span className={`px-3 py-1 ${colorClasses} rounded-xl text-[10px] font-black uppercase tracking-widest`}>
                 {b.label}
             </span>
         );
@@ -89,7 +103,10 @@ const MyApplications = () => {
                                 <h3 className="text-xl font-black text-[var(--text-main)] tracking-tight uppercase">Ariza topilmadi</h3>
                                 <p className="text-[var(--text-muted)] font-bold text-sm tracking-wide">Siz hali hech qanday ishga ariza topshirmagansiz.</p>
                             </div>
-                            <button className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 duration-300">
+                            <button 
+                                onClick={() => navigate('/jobs')}
+                                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95 duration-300"
+                            >
                                 Ish izlashni boshlash
                             </button>
                         </div>
@@ -151,7 +168,7 @@ const MyApplications = () => {
 
                                                     {app.status === 'interview' && app.ai_interview_data && (
                                                         <button
-                                                            onClick={() => window.location.href = `/interview/${app.id}`}
+                                                            onClick={() => navigate(`/interview/${app.id}`)}
                                                             className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-500/20 active:scale-95 duration-300 animate-pulse"
                                                             title="Suhbatni boshlash"
                                                         >

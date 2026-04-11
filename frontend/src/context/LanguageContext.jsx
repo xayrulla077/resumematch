@@ -61,6 +61,7 @@ const translations = {
     totalResumes: "Jami rezyumalar",
     analyzedResumes: "Tahlil qilingan",
     pendingResumes: "Kutilmoqda",
+    resumeBuilder: "Resume yaratish",
 
     // Jobs page
     jobsPage: "Ish o'rinlari",
@@ -183,6 +184,7 @@ const translations = {
     exportResumes: "Rezyumalarni eksport",
     exportJobs: "Vakansiyalarni eksport",
     exportAll: "Hammasini eksport",
+    exportApplicants: "Nomzodlarni eksport",
     aiModel: "AI Model",
     modelVersion: "Model versiyasi",
     accuracy: "Aniqlik",
@@ -195,7 +197,44 @@ const translations = {
     lastActive: "Oxirgi faollik",
     addUser: "Foydalanuvchi qo'shish",
     systemHealth: "Tizim salomatligi",
-    matches: "Mosliklar"
+    matches: "Mosliklar",
+    languageChanged: "Til {lang} ga o'zgartirildi",
+    notifications: "Bildirishnomalar",
+    recentMessages: "So'nggi xabarlar",
+    markAllRead: "Barchasini oqish",
+    noMessages: "Xabarlar yo'q",
+    menu: "Menu",
+    account: "Account",
+    profileSettings: "Profil Sozlamalari",
+    logout: "Chiqish",
+    allNotificationsRead: "Barcha bildirishnomalar o'qildi",
+    warehouse: "Ombori",
+    resumesDesc: "Barcha rezyumalarni boshqarish va tahlil qilish",
+    resumesLoadError: "Rezyumalarni yuklashda xatolik yuz berdi",
+    resumeUploadSuccess: "Rezyume muvaffaqiyatli yuklandi",
+    resumeUploadError: "Rezyumeni yuklashda xatolik yuz berdi",
+    invalidFileType: "Faqat PDF fayllari ruxsat etilgan",
+    confirmDelete: "Haqiqatanham o'chirmoqchimisiz?",
+    deleteSuccess: "Muvaffaqiyatli o'chirildi",
+    deleteError: "O'chirishda xatolik yuz berdi",
+    analysisStarted: "Tahlil boshlandi",
+    analysisError: "Tahlilda xatolik yuz berdi",
+    analysisResults: "Tahlil natijalari",
+    skills: "Ko'nikmalar",
+    experience: "Tajriba",
+    education: "Ma'lumot",
+    showing: "Ko'rsatilmoqda",
+    of: "dan",
+    myJobs: "Mening vakansiyalarim",
+    findJobs: "Vakansiyalar izlash",
+    submitApplication: "Ariza topshirish",
+    jobApplications: "Vakansiyaga arizalar",
+    jobSeeker: "Ish qidiruvchi",
+    seekerDesc: "Ish izlayman",
+    employer: "Ish beruvchi",
+    employerDesc: "Xodim izlayman",
+    selectRole: "Ro'lingizni tanlang",
+    companyName: "Kompaniya nomi"
   },
 
   ru: {
@@ -217,6 +256,10 @@ const translations = {
     appliedJobs: "КОЛ-ВО ЗАЯВОК",
     actions: "ДЕЙСТВИЯ",
     topCandidates: "Рейтинг лучших кандидатов",
+    myApplications: "Мои заявки",
+    myResume: "Мое резюме",
+    aiInterview: "AI собеседование",
+    applicants: "Кандидаты",
     recentAnalysis: "Последние анализы",
     candidateName: "КАНДИДАТ",
     jobPosition: "ДОЛЖНОСТЬ",
@@ -245,6 +288,7 @@ const translations = {
     totalResumes: "Всего резюме",
     analyzedResumes: "Проанализировано",
     pendingResumes: "Ожидание",
+    resumeBuilder: "Создать резюме",
     jobsPage: "Вакансии",
     addNewJob: "Добавить вакансию",
     jobTitle: "Название вакансии",
@@ -265,13 +309,11 @@ const translations = {
     description: "Описание",
     descriptionPlaceholder: "Подробное описание вакансии...",
     postedDate: "Дата публикации",
-    applicants: "Кандидаты",
     matchRate: "Уровень соответствия",
     activeJobs: "Активные вакансии",
     totalApplicants: "Всего кандидатов",
     avgMatchRate: "Средний уровень",
     edit: "Редактировать",
-    close: "Закрыть",
     save: "Сохранить",
     cancel: "Отмена",
     noJobs: "Пока нет вакансий",
@@ -359,6 +401,7 @@ const translations = {
     exportResumes: "Экспорт резюме",
     exportJobs: "Экспорт вакансий",
     exportAll: "Экспорт всего",
+    exportApplicants: "Экспорт кандидатов",
     aiModel: "AI Модель",
     modelVersion: "Версия модели",
     accuracy: "Точность",
@@ -371,7 +414,45 @@ const translations = {
     lastActive: "Последняя активность",
     addUser: "Добавить пользователя",
     systemHealth: "Здоровье системы",
-    matches: "Соответствия"
+    matches: "Соответствия",
+    languageChanged: "Язык изменён на {lang}",
+    notifications: "Уведомления",
+    recentMessages: "Последние сообщения",
+    markAllRead: "Прочитать все",
+    noMessages: "Нет сообщений",
+    close: "Закрыть",
+    menu: "Меню",
+    account: "Аккаунт",
+    profileSettings: "Настройки профиля",
+    logout: "Выход",
+    allNotificationsRead: "Все уведомления прочитаны",
+    warehouse: "Хранилище",
+    resumesDesc: "Управление и анализ всех резюме",
+    resumesLoadError: "Ошибка при загрузке резюме",
+    resumeUploadSuccess: "Резюме успешно загружено",
+    resumeUploadError: "Ошибка при загрузке резюме",
+    invalidFileType: "Разрешены только PDF файлы",
+    confirmDelete: "Вы уверены, что хотите удалить?",
+    deleteSuccess: "Успешно удалено",
+    deleteError: "Ошибка при удалении",
+    analysisStarted: "Анализ начат",
+    analysisError: "Ошибка при анализе",
+    analysisResults: "Результаты анализа",
+    skills: "Навыки",
+    experience: "Опыт",
+    education: "Образование",
+    showing: "Показано",
+    of: "из",
+    myJobs: "Мои вакансии",
+    findJobs: "Поиск вакансий",
+    submitApplication: "Отправить заявку",
+    jobApplications: "Заявки на вакансию",
+    jobSeeker: "Соискатель",
+    seekerDesc: "Ищу работу",
+    employer: "Работодатель",
+    employerDesc: "Ищу сотрудников",
+    selectRole: "Выберите роль",
+    companyName: "Название компании"
   },
 
   en: {
@@ -421,6 +502,7 @@ const translations = {
     totalResumes: "Total Resumes",
     analyzedResumes: "Analyzed",
     pendingResumes: "Pending",
+    resumeBuilder: "Create Resume",
     jobsPage: "Job Positions",
     addNewJob: "Add New Job",
     jobTitle: "Job Title",
@@ -535,6 +617,7 @@ const translations = {
     exportResumes: "Export Resumes",
     exportJobs: "Export Jobs",
     exportAll: "Export All",
+    exportApplicants: "Export Applicants",
     aiModel: "AI Model",
     modelVersion: "Model Version",
     accuracy: "Accuracy",
@@ -547,21 +630,66 @@ const translations = {
     lastActive: "Last Active",
     addUser: "Add User",
     systemHealth: "System Health",
-    matches: "Matches"
+    matches: "Matches",
+    languageChanged: "Language changed to {lang}",
+    notifications: "Notifications",
+    recentMessages: "Recent Messages",
+    markAllRead: "Mark all read",
+    noMessages: "No messages",
+    menu: "Menu",
+    account: "Account",
+    profileSettings: "Profile Settings",
+    logout: "Logout",
+    allNotificationsRead: "All notifications read",
+    warehouse: "Warehouse",
+    resumesDesc: "Manage and analyze all resumes",
+    resumesLoadError: "Error loading resumes",
+    resumeUploadSuccess: "Resume uploaded successfully",
+    resumeUploadError: "Error uploading resume",
+    invalidFileType: "Only PDF files are allowed",
+    confirmDelete: "Are you sure you want to delete?",
+    deleteSuccess: "Successfully deleted",
+    deleteError: "Error deleting",
+    analysisStarted: "Analysis started",
+    analysisError: "Error during analysis",
+    analysisResults: "Analysis Results",
+    skills: "Skills",
+    experience: "Experience",
+    education: "Education",
+    showing: "Showing",
+    of: "of",
+    myJobs: "My Jobs",
+    findJobs: "Find Jobs",
+    submitApplication: "Submit Application",
+    jobApplications: "Job Applications",
+    jobSeeker: "Job Seeker",
+    seekerDesc: "Looking for a job",
+    employer: "Employer",
+    employerDesc: "Looking for employees",
+    selectRole: "Select your role",
+    companyName: "Company Name"
   }
 };
 
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('uz');
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'uz';
+  });
+
+  const handleSetLanguage = (lang) => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+  };
 
   const t = (key) => {
-    return translations[language][key] || key;
+    const langTranslations = translations[language] || translations['uz'];
+    return langTranslations[key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'sonner';
 import {
     User, Mail, Lock, Phone, FileText, ArrowRight, BrainCircuit,
-    CheckCircle, Eye, EyeOff, AlertCircle, ShieldCheck
+    CheckCircle, Eye, EyeOff, AlertCircle, ShieldCheck, Building2,
+    Briefcase, UserCircle
 } from 'lucide-react';
 
 // ─── Password strength ────────────────────────────────────────────────────────
@@ -26,6 +28,10 @@ const getPasswordStrength = (password) => {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Register = () => {
+    const { register } = useAuth();
+    const navigate = useNavigate();
+    const { t } = useLanguage();
+    
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -33,14 +39,13 @@ const Register = () => {
         full_name: '',
         phone: '',
         bio: '',
+        role: 'candidate',  // candidate yoki employer
+        company_name: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [touched, setTouched] = useState({});
-
-    const { register } = useAuth();
-    const navigate = useNavigate();
 
     const passwordStrength = useMemo(() => getPasswordStrength(formData.password), [formData.password]);
 
@@ -54,7 +59,10 @@ const Register = () => {
         if (!formData.email.trim()) errs.email = "Email majburiy";
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = "Email format noto'g'ri";
         if (!formData.password) errs.password = "Parol majburiy";
-        else if (formData.password.length < 6) errs.password = "Parol kamida 6 ta belgi";
+        else if (formData.password.length < 8) errs.password = "Parol kamida 8 ta belgi";
+        else if (!/[A-Z]/.test(formData.password)) errs.password = "Parol kamida 1 katta harf bo'lishi kerak";
+        else if (!/[0-9]/.test(formData.password)) errs.password = "Parol kamida 1 raqam bo'lishi kerak";
+        if (formData.role === 'employer' && !formData.company_name.trim()) errs.company_name = "Kompaniya nomi majburiy";
         return errs;
     }, [formData]);
 
@@ -71,7 +79,7 @@ const Register = () => {
     const fieldError = (field) => touched[field] && validationErrors[field];
 
     const inputClass = (field) =>
-        `w-full bg-[var(--bg-main)]/50 border rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-slate-600 ${fieldError(field)
+        `w-full bg-[var(--bg-input)] border rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-[var(--text-muted)] ${fieldError(field)
             ? 'border-rose-500 focus:ring-rose-500/30'
             : 'border-[var(--border-main)] focus:ring-indigo-500/30 focus:border-indigo-500'
         }`;
@@ -80,9 +88,22 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Touch all fields
-        setTouched({ full_name: true, username: true, email: true, password: true });
-        if (!isValid) {
+        
+        // Validate all fields before submit
+        const errs = {};
+        if (!formData.full_name?.trim()) errs.full_name = "To'liq ism majburiy";
+        if (!formData.username?.trim()) errs.username = "Username majburiy";
+        else if (formData.username.length < 3) errs.username = "Username kamida 3 ta belgi";
+        if (!formData.email?.trim()) errs.email = "Email majburiy";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = "Email format noto'g'ri";
+        if (!formData.password) errs.password = "Parol majburiy";
+        else if (formData.password.length < 8) errs.password = "Parol kamida 8 ta belgi";
+        else if (!/[A-Z]/.test(formData.password)) errs.password = "Parol kamida 1 katta harf bo'lishi kerak";
+        else if (!/[0-9]/.test(formData.password)) errs.password = "Parol kamida 1 raqam bo'lishi kerak";
+        if (formData.role === 'employer' && !formData.company_name?.trim()) errs.company_name = "Kompaniya nomi majburiy";
+        
+        if (Object.keys(errs).length > 0) {
+            setTouched({ full_name: true, username: true, email: true, password: true, company_name: true });
             toast.error("Iltimos, barcha maydonlarni to'g'ri to'ldiring");
             return;
         }
@@ -90,9 +111,10 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await register(formData);
+            const submitData = { ...formData };
+            await register(submitData);
             toast.success("Muvaffaqiyatli ro'yxatdan o'tdingiz! 🎉");
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             if (err.response?.status === 422 && Array.isArray(err.response.data?.detail)) {
                 const msgs = err.response.data.detail.map((e) => e.msg).join(', ');
@@ -224,7 +246,7 @@ const Register = () => {
                                     type={showPassword ? 'text' : 'password'}
                                     name="password"
                                     required
-                                    className={`w-full bg-[var(--bg-main)]/50 border rounded-2xl py-4 pl-12 pr-12 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-slate-600 ${fieldError('password')
+                                    className={`w-full bg-[var(--bg-input)] border rounded-2xl py-4 pl-12 pr-12 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-[var(--text-muted)] ${fieldError('password')
                                         ? 'border-rose-500 focus:ring-rose-500/30'
                                         : 'border-[var(--border-main)] focus:ring-indigo-500/30 focus:border-indigo-500'
                                         }`}
@@ -276,6 +298,65 @@ const Register = () => {
                             )}
                         </div>
 
+                        {/* Role Selection */}
+                        <div className="md:col-span-2 space-y-1.5 group">
+                            <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1 group-focus-within:text-indigo-400 transition-colors">Ro'lingizni tanlang</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, role: 'candidate' }))}
+                                    className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-3 ${
+                                        formData.role === 'candidate'
+                                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                                            : 'border-[var(--border-main)] text-[var(--text-muted)] hover:border-indigo-500/30'
+                                    }`}
+                                >
+                                    <UserCircle size={24} />
+                                    <div className="text-left">
+                                        <span className="block font-black text-xs uppercase">{t('jobSeeker') || 'Ish qidiruvchi'}</span>
+                                        <span className="block text-[10px] opacity-60">{t('seekerDesc') || 'Ish izlayman'}</span>
+                                    </div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, role: 'employer' }))}
+                                    className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-3 ${
+                                        formData.role === 'employer'
+                                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                                            : 'border-[var(--border-main)] text-[var(--text-muted)] hover:border-indigo-500/30'
+                                    }`}
+                                >
+                                    <Building2 size={24} />
+                                    <div className="text-left">
+                                        <span className="block font-black text-xs uppercase">{t('employer') || 'Ish beruvchi'}</span>
+                                        <span className="block text-[10px] opacity-60">{t('employerDesc') || 'Xodim izlayman'}</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Company Name (for employers) */}
+                        {formData.role === 'employer' && (
+                            <div className="md:col-span-2 space-y-1.5 group animate-in fade-in slide-in-from-top-2">
+                                <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1 group-focus-within:text-indigo-400 transition-colors">Kompaniya nomi</label>
+                                <div className="relative">
+                                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-indigo-400 transition-colors" size={16} />
+                                    <input
+                                        type="text"
+                                        name="company_name"
+                                        className={inputClass('company_name')}
+                                        placeholder="Mening kompaniyam"
+                                        value={formData.company_name}
+                                        onChange={handleChange}
+                                        onBlur={() => handleBlur('company_name')}
+                                    />
+                                </div>
+                                {fieldError('company_name') && (
+                                    <p className="text-rose-400 text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-1 animate-in fade-in duration-200"><AlertCircle size={10} />{fieldError('company_name')}</p>
+                                )}
+                            </div>
+                        )}
+
                         {/* Bio */}
                         <div className="md:col-span-2 space-y-1.5 group">
                             <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1 group-focus-within:text-indigo-400 transition-colors">Bio (ixtiyoriy)</label>
@@ -284,7 +365,7 @@ const Register = () => {
                                 <textarea
                                     name="bio"
                                     rows="3"
-                                    className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all resize-none placeholder:text-slate-600"
+                                    className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all resize-none placeholder:text-[var(--text-muted)]"
                                     placeholder="Tajribangiz va ko'nikmalaringiz haqida..."
                                     value={formData.bio}
                                     onChange={handleChange}

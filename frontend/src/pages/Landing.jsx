@@ -44,7 +44,7 @@ const Landing = () => {
                                 <button onClick={() => navigate('/register')} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all active:scale-95">Boshlash</button>
                             </>
                         ) : (
-                            <button onClick={() => navigate('/')} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all active:scale-95 flex items-center gap-2">
+                            <button onClick={() => navigate('/dashboard')} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all active:scale-95 flex items-center gap-2">
                                 Dashboard
                                 <ChevronRight size={16} />
                             </button>
@@ -123,15 +123,26 @@ const Landing = () => {
                             { icon: Users, title: "Applicant Flow", desc: "Arizalarni boshqarish va nomzodlar bilan muloqotni bitta tizimga jamlang.", color: "rose" },
                             { icon: ShieldCheck, title: "Secure Storage", desc: "Barcha ma'lumotlar shifrlangan holda saqlanadi va maxfiylik ta'minlanadi.", color: "blue" },
                             { icon: Rocket, title: "Advanced Search", desc: "Nomzodlarni mahorat darajasi va tajribasi bo'yicha aqlli qidiruv tizimi.", color: "amber" },
-                        ].map((f, i) => (
+                        ].map((f, i) => {
+                            const featureColors = {
+                                indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500',
+                                purple: 'bg-purple-500/10 border-purple-500/20 text-purple-500',
+                                emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500',
+                                rose: 'bg-rose-500/10 border-rose-500/20 text-rose-500',
+                                blue: 'bg-blue-500/10 border-blue-500/20 text-blue-500',
+                                amber: 'bg-amber-500/10 border-amber-500/20 text-amber-500',
+                            };
+                            const colorClasses = featureColors[f.color] || featureColors.indigo;
+                            return (
                             <div key={i} className="group p-10 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] hover:border-indigo-600/30 hover:shadow-2xl transition-all duration-500">
-                                <div className={`w-16 h-16 rounded-2xl bg-${f.color}-500/10 border border-${f.color}-500/20 flex items-center justify-center text-${f.color}-500 mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                                <div className={`w-16 h-16 rounded-2xl ${colorClasses} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
                                     <f.icon size={30} />
                                 </div>
                                 <h3 className="text-xl font-black mb-4 uppercase tracking-tight text-[var(--text-main)]">{f.title}</h3>
                                 <p className="text-[var(--text-muted)] font-bold leading-relaxed">{f.desc}</p>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </section>

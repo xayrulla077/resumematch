@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { resumesAPI, statsAPI, analyticsAPI } from '../services/api';
-import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
 import {
   FileText,
@@ -33,6 +32,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import StatCard from '../components/StatCard';
 
 // ─── Static chart data ───────────────────────────────────────────────────────
 
@@ -112,7 +112,6 @@ const TableRowSkeleton = () => (
 
 const Dashboard = () => {
   const { language } = useLanguage();
-  const { theme } = useTheme();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({ resumes: 0, jobs: 0, applicants: 0 });
@@ -292,74 +291,40 @@ const Dashboard = () => {
           ) : (
             <>
               {/* Card 1 — Rezyumalar */}
-              <div
-                className={staggerClass(1, 'relative overflow-hidden group p-8 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl hover:bg-white/[0.02] cursor-pointer transition-all')}
+              <StatCard
+                icon={FileText}
+                title="Jami Rezyumalar"
+                value={stats.resumes}
+                color="indigo"
+                className={staggerClass(1, '')}
                 style={staggerStyle(1)}
                 onClick={() => navigate('/resumes')}
-              >
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-700 pointer-events-none">
-                  <FileText className="w-32 h-32 text-indigo-500" />
-                </div>
-                <div className="relative z-10">
-                  <div className="p-4 w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-lg">
-                    <FileText size={28} />
-                  </div>
-                  <h4 className="text-[var(--text-muted)] font-black text-[10px] uppercase tracking-[0.2em] mb-2">Jami Rezyumalar</h4>
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-5xl font-black text-[var(--text-main)] tracking-tighter">{stats.resumes}</span>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-xl text-[10px] font-black border border-emerald-500/20">
-                      <TrendingUp size={12} />
-                      +12%
-                    </div>
-                  </div>
-                </div>
-              </div>
+                trend={{ icon: TrendingUp, text: '+12%', color: 'emerald' }}
+              />
 
               {/* Card 2 — Ish O'rinlari */}
-              <div
-                className={staggerClass(2, 'relative overflow-hidden group p-8 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl hover:bg-white/[0.02] cursor-pointer transition-all')}
+              <StatCard
+                icon={Briefcase}
+                title="Ish O'rinlari"
+                value={stats.jobs}
+                color="purple"
+                className={staggerClass(2, '')}
                 style={staggerStyle(2)}
                 onClick={() => navigate('/jobs')}
-              >
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-700 pointer-events-none">
-                  <Briefcase className="w-32 h-32 text-purple-500" />
-                </div>
-                <div className="relative z-10">
-                  <div className="p-4 w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500 mb-8 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 shadow-lg">
-                    <Briefcase size={28} />
-                  </div>
-                  <h4 className="text-[var(--text-muted)] font-black text-[10px] uppercase tracking-[0.2em] mb-2">Ish O'rinlari</h4>
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-5xl font-black text-[var(--text-main)] tracking-tighter">{stats.jobs}</span>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-500 rounded-xl text-[10px] font-black border border-indigo-500/20 uppercase tracking-widest">
-                      Faol
-                    </div>
-                  </div>
-                </div>
-              </div>
+                trend={{ text: 'FAOL', color: 'indigo' }}
+              />
 
               {/* Card 3 — Nomzodlar */}
-              <div
-                className={staggerClass(3, 'relative overflow-hidden group p-8 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl hover:bg-white/[0.02] cursor-pointer transition-all')}
+              <StatCard
+                icon={Users}
+                title="Nomzodlar"
+                value={stats.applicants}
+                color="teal"
+                className={staggerClass(3, '')}
                 style={staggerStyle(3)}
                 onClick={() => navigate('/activities')}
-              >
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-700 pointer-events-none">
-                  <Users className="w-32 h-32 text-teal-500" />
-                </div>
-                <div className="relative z-10">
-                  <div className="p-4 w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-500 mb-8 group-hover:bg-teal-600 group-hover:text-white transition-all duration-500 shadow-lg">
-                    <Users size={28} />
-                  </div>
-                  <h4 className="text-[var(--text-muted)] font-black text-[10px] uppercase tracking-[0.2em] mb-2">Nomzodlar</h4>
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-5xl font-black text-[var(--text-main)] tracking-tighter">{stats.applicants}</span>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-amber-500 rounded-xl text-[10px] font-black border border-amber-500/20 uppercase tracking-widest">
-                      Yangi
-                    </div>
-                  </div>
-                </div>
-              </div>
+                trend={{ text: 'YANGI', color: 'amber' }}
+              />
             </>
           )}
         </div>
@@ -612,16 +577,22 @@ const Dashboard = () => {
                       <td className="py-7 px-4">
                         <div className="flex flex-wrap gap-2 max-w-[280px]">
                           {resume.skills
-                            ? resume.skills.split(', ').slice(0, 3).map((skill) => (
-                              <span
-                                key={skill}
-                                className="px-3 py-1.5 bg-[var(--bg-main)]/50 border border-[var(--border-main)] text-[var(--text-muted)] group-hover/row:text-[var(--text-main)] group-hover/row:border-indigo-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                              >
-                                {skill}
-                              </span>
-                            ))
-                            : <span className="text-[var(--text-muted)] text-[10px] font-black italic uppercase italic">Tahlil qilinmoqda...</span>
-                          }
+                            ? (() => {
+                                const skillsArray = Array.isArray(resume.skills) 
+                                  ? resume.skills 
+                                  : typeof resume.skills === 'string' 
+                                    ? resume.skills.split(', ')
+                                    : [];
+                                return skillsArray.slice(0, 3).map((skill) => (
+                                  <span
+                                    key={skill}
+                                    className="px-3 py-1.5 bg-[var(--bg-main)]/50 border border-[var(--border-main)] text-[var(--text-muted)] group-hover/row:text-[var(--text-main)] group-hover/row:border-indigo-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                                  >
+                                    {skill}
+                                  </span>
+                                ));
+                              })()
+                            : <span className="text-[var(--text-muted)] text-[10px] font-black italic uppercase italic">Tahlil qilinmoqda...</span>}
                         </div>
                       </td>
 
@@ -681,11 +652,11 @@ const Dashboard = () => {
             <div className="p-8 lg:p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl font-black shadow-2xl shadow-indigo-600/30">
-                  {(selectedResume.full_name || selectedResume.file_name).charAt(0).toUpperCase()}
+                  {(selectedResume.full_name || selectedResume.file_name || '').charAt(0).toUpperCase() || '?'}
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-white uppercase tracking-tight">{selectedResume.full_name || "Nomzod"}</h2>
-                  <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mt-1 tracking-[0.2em]">{selectedResume.file_name}</p>
+                  <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mt-1 tracking-[0.2em]">{selectedResume.file_name || 'Noma\'lum'}</p>
                 </div>
               </div>
               <button onClick={handleCloseModal} className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all">
@@ -700,17 +671,26 @@ const Dashboard = () => {
                   { icon: Phone, label: 'Telefon', value: selectedResume.phone, color: 'purple' },
                   { icon: MapPin, label: 'Joylashuv', value: selectedResume.location, color: 'rose' },
                   { icon: Zap, label: 'Match Score', value: `${selectedResume.match_score || 85}%`, color: 'amber' },
-                ].map(({ icon: Icon, label, value, color }) => (
-                  <div key={label} className="p-5 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-5 group/item hover:border-white/10 transition-all">
-                    <div className={`w-12 h-12 rounded-2xl bg-${color}-500/10 border border-${color}-500/20 text-${color}-500 flex items-center justify-center transition-all group-hover/item:scale-110 shadow-lg`}>
-                      <Icon size={20} />
+                ].map(({ icon: Icon, label, value, color }) => {
+                  const colorClasses = {
+                    indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500',
+                    purple: 'bg-purple-500/10 border-purple-500/20 text-purple-500',
+                    rose: 'bg-rose-500/10 border-rose-500/20 text-rose-500',
+                    amber: 'bg-amber-500/10 border-amber-500/20 text-amber-500',
+                  };
+                  const classes = colorClasses[color] || colorClasses.indigo;
+                  return (
+                    <div key={label} className="p-5 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-5 group/item hover:border-white/10 transition-all">
+                      <div className={`w-12 h-12 rounded-2xl ${classes} flex items-center justify-center transition-all group-hover/item:scale-110 shadow-lg`}>
+                        <Icon size={20} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</p>
+                        <p className="text-sm font-black text-white mt-1 uppercase truncate">{value || 'Noma\'lum'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</p>
-                      <p className="text-sm font-black text-white mt-1 uppercase truncate">{value || 'Noma\'lum'}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="space-y-4">

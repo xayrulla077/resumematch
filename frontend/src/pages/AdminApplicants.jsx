@@ -137,8 +137,18 @@ const AdminApplicants = () => {
             rejected: { color: 'rose', label: 'Rad Etildi' },
         };
         const b = badges[status] || badges.pending;
+        
+        const statusColors = {
+            indigo: 'bg-indigo-500/10 text-indigo-400 border-indigo-400/20',
+            blue: 'bg-blue-500/10 text-blue-400 border-blue-400/20',
+            purple: 'bg-purple-500/10 text-purple-400 border-purple-400/20',
+            emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-400/20',
+            rose: 'bg-rose-500/10 text-rose-400 border-rose-400/20',
+        };
+        const colorClasses = statusColors[b.color] || statusColors.indigo;
+        
         return (
-            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-${b.color}-500/10 text-${b.color}-400 border border-${b.color}-400/20`}>
+            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${colorClasses}`}>
                 {b.label}
             </span>
         );
@@ -254,7 +264,7 @@ const AdminApplicants = () => {
                                         >
                                             <div className="flex justify-between items-start mb-6">
                                                 <div className="w-14 h-14 bg-[var(--bg-main)]/50 rounded-2xl flex items-center justify-center text-[var(--text-muted)] font-black group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 border border-[var(--border-main)] shadow-inner text-xl uppercase">
-                                                    {app.applicant_name.charAt(0)}
+                                                    {app.applicant_name?.charAt(0) || app.user?.full_name?.charAt(0) || '?'}
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
                                                     <div className="flex items-center gap-2 bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
@@ -503,7 +513,24 @@ const AdminApplicants = () => {
                             <button onClick={() => setSelectedAIApp(null)} className="px-10 py-4 bg-white/5 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border border-white/5 hover:bg-white/10 hover:text-white transition-all active:scale-95">
                                 Yopish
                             </button>
-                            <button className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95">
+                            <button 
+                                onClick={async () => {
+                                    try {
+                                        const response = await analyticsAPI.exportApplicantsPDF(selectedJob?.id);
+                                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.setAttribute('download', `applicants_report_${selectedJob?.title}.pdf`);
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        link.remove();
+                                    } catch (error) {
+                                        console.error('PDF export error:', error);
+                                        alert('PDF export qilishda xatolik yuz berdi');
+                                    }
+                                }}
+                                className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
+                            >
                                 PDF Hisobot
                             </button>
                         </div>

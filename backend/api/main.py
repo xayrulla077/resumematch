@@ -18,7 +18,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Resume Matcher API",
     description="AI-powered resume and job matching platform",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS configuration
@@ -44,23 +44,12 @@ os.makedirs("uploads", exist_ok=True)
 # Mount static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-
-# Import routers (keyinroq yaratamiz)
-# from api.routers import auth, resumes, jobs, analytics, activities
-# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(resumes.router, prefix="/api/resumes", tags=["Resumes"])
-# app.include_router(jobs.router, prefix="/api/jobs", tags=["Jobs"])
-# app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
-# app.include_router(activities.router, prefix="/api/activities", tags=["Activities"])
+# NOTE: Bu fayl ishlatilmaydi. Backendni ishga tushirish uchun backend/main.py ishlatilsin.
 
 
 @app.get("/")
 async def root():
-    return {
-        "message": "Resume Matcher API",
-        "version": "1.0.0",
-        "status": "running"
-    }
+    return {"message": "Resume Matcher API", "version": "1.0.0", "status": "running"}
 
 
 @app.get("/api/health")
@@ -68,7 +57,7 @@ async def health_check():
     return {
         "status": "healthy",
         "database": "connected",
-        "timestamp": "2025-01-19T12:00:00"
+        "timestamp": "2025-01-19T12:00:00",
     }
 
 
@@ -84,16 +73,11 @@ async def get_stats(db: Session = Depends(get_db)):
         "total_resumes": total_resumes,
         "total_jobs": total_jobs,
         "total_users": total_users,
-        "total_matches": total_matches
+        "total_matches": total_matches,
     }
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "api.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)

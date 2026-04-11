@@ -58,7 +58,20 @@ const Interview = () => {
             }
 
             if (application.ai_interview_data) {
-                setQuestions(JSON.parse(application.ai_interview_data));
+                try {
+                    const parsedQuestions = JSON.parse(application.ai_interview_data);
+                    if (!Array.isArray(parsedQuestions) || parsedQuestions.length === 0) {
+                        toast.error("Savollar hali tayyorlanmagan yoki xatolik yuz berdi");
+                        navigate('/applications');
+                        return;
+                    }
+                    setQuestions(parsedQuestions);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    toast.error("Savollar formati xato");
+                    navigate('/applications');
+                    return;
+                }
             } else {
                 toast.error("Siz uchun hali intervyu savollari tayyorlanmagan");
                 navigate('/applications');
@@ -210,7 +223,7 @@ const Interview = () => {
                             <h3 className="text-2xl font-black text-[var(--text-main)] tracking-tight">Savol:</h3>
                         </div>
                         <p className="text-xl font-bold text-[var(--text-main)] leading-relaxed pl-2 border-l-4 border-indigo-500/30">
-                            {questions[currentStep]}
+                            {questions[currentStep] || 'Savollar mavjud emas'}
                         </p>
                     </div>
 

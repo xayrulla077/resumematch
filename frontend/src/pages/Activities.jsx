@@ -118,20 +118,28 @@ const Activities = () => {
             { label: 'Barcha Faoliyatlar', value: activities.length, icon: Activity, color: 'indigo' },
             { label: 'Bugungi Faoliyat', value: todayActivities, icon: CheckCircle, color: 'emerald' },
             { label: 'So\'nggi Faollik', value: activities.filter(a => (new Date() - new Date(a.created_at)) < 3600000).length, icon: Clock, color: 'purple' }
-          ].map((stat, idx) => (
+          ].map((stat, idx) => {
+            const statColors = {
+              indigo: { bg: 'bg-indigo-500/5', hover: 'bg-indigo-500/10', border: 'border-indigo-500/20', shadow: 'shadow-indigo-500/10', text: 'text-indigo-400' },
+              emerald: { bg: 'bg-emerald-500/5', hover: 'bg-emerald-500/10', border: 'border-emerald-500/20', shadow: 'shadow-emerald-500/10', text: 'text-emerald-400' },
+              purple: { bg: 'bg-purple-500/5', hover: 'bg-purple-500/10', border: 'border-purple-500/20', shadow: 'shadow-purple-500/10', text: 'text-purple-400' },
+            };
+            const colors = statColors[stat.color] || statColors.indigo;
+            return (
             <div key={idx} className="p-8 rounded-[2.5rem] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] shadow-2xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-${stat.color}-500/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-${stat.color}-500/10 transition-colors`}></div>
+              <div className={`absolute top-0 right-0 w-32 h-32 ${colors.bg} rounded-full blur-3xl -mr-10 -mt-10 group-hover:${colors.hover} transition-colors`}></div>
               <div className="relative z-10 flex items-center justify-between">
                 <div className="space-y-2">
                   <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{stat.label}</p>
                   <p className={`text-4xl font-black text-[var(--text-main)] tracking-tight`}>{stat.value || 0}</p>
                 </div>
-                <div className={`w-16 h-16 bg-${stat.color}-500/10 rounded-2xl flex items-center justify-center border border-${stat.color}-500/20 shadow-lg shadow-${stat.color}-500/10`}>
-                  <stat.icon className={`text-${stat.color}-400`} size={28} />
+                <div className={`w-16 h-16 ${colors.bg} rounded-2xl flex items-center justify-center border ${colors.border} shadow-lg ${colors.shadow}`}>
+                  <stat.icon className={colors.text} size={28} />
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Filters */}

@@ -48,15 +48,31 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
         setMessage({ type: '', text: '' });
+        
+        console.log('Submitting form data:', formData);
+        
         try {
-            const response = await api.put('/auth/me', formData);
-            setUser(response.data);
+            const response = await api.put('/auth/me', {
+                full_name: formData.full_name,
+                phone: formData.phone,
+                bio: formData.bio,
+                email: formData.email
+            });
+            
+            console.log('Update response:', response.data);
+            
+            // Update local user state
+            if (response.data) {
+                setUser(response.data);
+            }
+            
             setIsEditing(false);
             setMessage({ type: 'success', text: 'Profil muvaffaqiyatli yangilandi!' });
         } catch (error) {
+            console.error('Update error:', error);
             setMessage({
                 type: 'error',
-                text: error.response?.data?.detail || 'Xatolik yuz berdi. Qaytadan urinib ko\'ring.'
+                text: error.response?.data?.detail || error.message || 'Xatolik yuz berdi. Qaytadan urinib ko\'ring.'
             });
         } finally {
             setLoading(false);
@@ -73,8 +89,12 @@ const Profile = () => {
 
         try {
             const response = await api.post('/auth/upload-avatar', uploadData);
-            setUser({ ...user, profile_image: response.data.url });
-            setMessage({ type: 'success', text: 'Profil rasmi yangilandi!' });
+            if (response.data?.url) {
+                setUser({ ...user, profile_image: response.data.url });
+                setMessage({ type: 'success', text: 'Profil rasmi yangilandi!' });
+            } else {
+                setMessage({ type: 'error', text: 'Rasm URL topilmadi' });
+            }
         } catch (error) {
             setMessage({
                 type: 'error',
@@ -88,7 +108,7 @@ const Profile = () => {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-[#0a0f1d] p-8 relative overflow-hidden font-['Outfit']">
+        <div className="min-h-screen bg-[var(--bg-main)] p-8 relative overflow-hidden font-['Outfit']">
             {/* Background Decorative Elements */}
             <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse"></div>
             <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-purple-600/5 rounded-full blur-[120px]"></div>
@@ -96,8 +116,8 @@ const Profile = () => {
             <div className="max-w-4xl mx-auto relative z-10 space-y-10 animate-in fade-in duration-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black text-white tracking-tight">PROFIL <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">SOZLAMALARI</span> ⚙️</h1>
-                        <p className="text-slate-400 mt-2 font-bold uppercase tracking-widest text-xs">Shaxsiy ma'lumotlaringizni boshqaring va yangilang.</p>
+                        <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tight">PROFIL <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">SOZLAMALARI</span> ⚙️</h1>
+                        <p className="text-[var(--text-muted)] mt-2 font-bold uppercase tracking-widest text-xs">Shaxsiy ma'lumotlaringizni boshqaring va yangilang.</p>
                     </div>
                 </div>
 
@@ -114,7 +134,7 @@ const Profile = () => {
                     </div>
                 )}
 
-                <div className="rounded-[3rem] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden relative group">
+                <div className="rounded-[3rem] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] shadow-2xl overflow-hidden relative group">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                     {/* Profile Header Background */}
@@ -131,15 +151,15 @@ const Profile = () => {
                         {/* Avatar Section */}
                         <div className="relative -mt-24 mb-12 flex flex-col md:flex-row items-end gap-8">
                             <div className="relative group/avatar">
-                                <div className="w-44 h-44 rounded-[2.5rem] bg-[#0a0f1d] p-1.5 shadow-2xl relative overflow-hidden border border-white/10 group-hover/avatar:border-indigo-500/50 transition-colors duration-500">
+                                <div className="w-44 h-44 rounded-[2.5rem] bg-[var(--bg-main)] p-1.5 shadow-2xl relative overflow-hidden border border-[var(--border-main)] group-hover/avatar:border-indigo-500/50 transition-colors duration-500">
                                     {user.profile_image ? (
                                         <img
-                                            src={`${import.meta.env.VITE_API_URL}${user.profile_image}`}
+                                            src={user.profile_image.startsWith('http') ? user.profile_image : `${import.meta.env.VITE_API_URL || ''}${user.profile_image}`}
                                             alt="Avatar"
                                             className="w-full h-full rounded-[2.1rem] object-cover"
                                         />
                                     ) : (
-                                        <div className="w-full h-full rounded-[2.1rem] bg-white/5 flex items-center justify-center text-slate-500">
+                                        <div className="w-full h-full rounded-[2.1rem] bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-muted)]">
                                             <UserIcon size={64} />
                                         </div>
                                     )}
@@ -158,14 +178,14 @@ const Profile = () => {
                             </div>
 
                             <div className="flex-1 pb-4 text-center md:text-left">
-                                <h1 className="text-4xl font-black text-white tracking-tight mb-3 uppercase">{user.full_name || user.username}</h1>
+                                <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tight mb-3 uppercase">{user.full_name || user.username}</h1>
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                     <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
                                         {user.role}
                                     </span>
-                                    <div className="h-1.5 w-1.5 bg-white/10 rounded-full"></div>
-                                    <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                                        Joined {new Date(user.created_at).toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' })}
+                                    <div className="h-1.5 w-1.5 bg-[var(--border-main)] rounded-full"></div>
+                                    <span className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em]">
+                                        Joined {user.created_at ? new Date(user.created_at).toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' }) : 'Noma\'lum'}
                                     </span>
                                 </div>
                             </div>
@@ -173,7 +193,7 @@ const Profile = () => {
                             {!isEditing && (
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="mb-4 flex items-center gap-3 px-8 py-3.5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 duration-300"
+                                    className="mb-4 flex items-center gap-3 px-8 py-3.5 bg-[var(--bg-main)] border border-[var(--border-main)] text-[var(--text-main)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 duration-300"
                                 >
                                     <Edit2 size={18} className="text-indigo-400" />
                                     Tahrirlash
@@ -189,19 +209,19 @@ const Profile = () => {
                                         <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                                             <UserIcon size={20} className="text-indigo-400" />
                                         </div>
-                                        <h3 className="text-white font-black uppercase tracking-tight text-lg">Umumiy Ma'lumotlar</h3>
+                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Umumiy Ma'lumotlar</h3>
                                     </div>
 
                                     <div className="space-y-6">
                                         <div className="group/input">
-                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">To'liq ism</label>
+                                            <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-3 ml-1">To'liq ism</label>
                                             <input
                                                 type="text"
                                                 name="full_name"
                                                 disabled={!isEditing}
                                                 value={formData.full_name}
                                                 onChange={handleChange}
-                                                className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                                                className="w-full px-6 py-4 bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl text-sm font-bold text-[var(--text-main)] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-[var(--text-muted)] disabled:opacity-50"
                                                 placeholder="Ism sharifingiz..."
                                             />
                                         </div>
@@ -227,7 +247,7 @@ const Profile = () => {
                                         <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20">
                                             <Mail size={20} className="text-purple-400" />
                                         </div>
-                                        <h3 className="text-white font-black uppercase tracking-tight text-lg">Aloqa Ma'lumotlari</h3>
+                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Aloqa Ma'lumotlari</h3>
                                     </div>
 
                                     <div className="space-y-6">
@@ -241,7 +261,7 @@ const Profile = () => {
                                                     disabled={!isEditing}
                                                     value={formData.email}
                                                     onChange={handleChange}
-                                                    className="w-full pl-14 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                                                    className="w-full pl-14 pr-6 py-4 bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl text-sm font-bold text-[var(--text-main)] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-[var(--text-muted)] disabled:opacity-50"
                                                     placeholder="example@mail.com"
                                                 />
                                             </div>
@@ -257,7 +277,7 @@ const Profile = () => {
                                                     disabled={!isEditing}
                                                     value={formData.phone}
                                                     onChange={handleChange}
-                                                    className="w-full pl-14 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                                                    className="w-full pl-14 pr-6 py-4 bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl text-sm font-bold text-[var(--text-main)] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-[var(--text-muted)] disabled:opacity-50"
                                                     placeholder="+998 90 123 45 67"
                                                 />
                                             </div>
@@ -271,7 +291,7 @@ const Profile = () => {
                                         <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
                                             <FileText size={20} className="text-blue-400" />
                                         </div>
-                                        <h3 className="text-white font-black uppercase tracking-tight text-lg">Men haqimda (Bio)</h3>
+                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Men haqimda (Bio)</h3>
                                     </div>
                                     <div className="group/input">
                                         <textarea
@@ -280,7 +300,7 @@ const Profile = () => {
                                             disabled={!isEditing}
                                             value={formData.bio}
                                             onChange={handleChange}
-                                            className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-slate-600 resize-none disabled:opacity-50 min-h-[160px]"
+                                            className="w-full px-6 py-5 bg-[var(--bg-input)] border border-[var(--border-main)] rounded-3xl text-sm font-bold text-[var(--text-main)] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none transition-all placeholder:text-[var(--text-muted)] resize-none disabled:opacity-50 min-h-[160px]"
                                             placeholder="O'zingiz haqingizda qisqacha ma'lumot qoldiring..."
                                         ></textarea>
                                     </div>
@@ -297,9 +317,10 @@ const Profile = () => {
                                         Bekor qilish
                                     </button>
                                     <button
-                                        type="submit"
+                                        type="button"
+                                        onClick={handleSubmit}
                                         disabled={loading}
-                                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:bg-slate-800 disabled:text-slate-500"
+                                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:bg-slate-800 disabled:text-slate-500 cursor-pointer relative z-50"
                                     >
                                         {loading ? (
                                             <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>

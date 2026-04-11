@@ -5,18 +5,19 @@
 @tailwind utilities;
 
 :root {
-  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%);
+  --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  --secondary-gradient: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
   
-  /* Light Theme */
-  --bg-main: #f8fafc;
+  /* Light Theme - Warm Cream */
+  --bg-main: #fafaf9;
   --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-main: rgba(0, 0, 0, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-input: #f5f5f4;
+  --text-main: #1c1917;
+  --text-muted: #78716c;
+  --border-main: #e7e5e4;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(139, 92, 246, 0.15);
 }
 
 .dark {
@@ -24,11 +25,13 @@
   --bg-main: #0a0f1d;
   --bg-surface: #111827;
   --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-input: #1e293b;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-main: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
+  color-scheme: dark;
 }
 
 * {
@@ -43,6 +46,26 @@ body {
   background-color: var(--bg-main);
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Input field autofill fix ────────────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
+  caret-color: var(--text-main) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure all inputs have correct text color and caret */
+input, textarea, select {
+  color: var(--text-main);
+  caret-color: var(--text-main);
 }
 
 .glass-card {

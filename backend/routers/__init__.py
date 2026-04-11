@@ -1,1 +1,24 @@
-# Routers package
+# Routers package - export routers
+from routers.auth import router as auth_router
+from routers.resumes_router import router as resumes_router
+from routers.jobs_router import router as jobs_router
+from routers.applications_router import router as applications_router
+from routers.analytics import router as analytics
+from routers.admin_router import router as admin_router
+from routers.notifications import router as notifications
+from routers.messages_router import router as messages_router
+from routers.tests_router import router as tests_router
+from routers.skills_router import router as skills_router
+from routers.reviews_router import router as reviews_router
+from routers.career_router import router as career_router
+from routers.video_router import router as video_router
+from routers.map_router import router as map_router
+from routers.push_router import router as push_router
+from routers.best_candidates import router as best_candidates_router
+from routers.interview_scheduler import router as interview_scheduler_router
+from routers.company_router import router as company_router
+from routers.online_test import router as online_test_router
+from routers.resume_generator import router as resume_generator_router
+from routers.skills_verification import router as skills_verification_router
+from routers.job_alerts import router as job_alerts_router
+from routers.saved_jobs import router as saved_jobs_router

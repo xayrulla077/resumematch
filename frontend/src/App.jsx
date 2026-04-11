@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Resumes from './pages/Resumes';
 import Jobs from './pages/Jobs';
+import MyJobs from './pages/MyJobs';
 import Analytics from './pages/Analytics';
 import Activities from './pages/Activities';
 import AdminPanel from './pages/AdminPanel';
@@ -15,15 +16,28 @@ import Register from './pages/Register';
 import MyApplications from './pages/MyApplications';
 import AdminApplicants from './pages/AdminApplicants';
 import Profile from './pages/Profile';
-import Landing from './pages/Landing';
 import Interview from './pages/Interview';
+import ResumeBuilder from './pages/ResumeBuilder';
+import Intro from './pages/Intro';
+import Messages from './pages/Messages';
+import Tests from './pages/Tests';
+import BestCandidates from './pages/BestCandidates';
+import ResumeGenerator from './pages/ResumeGenerator';
+import CompanyProfile from './pages/CompanyProfile';
+import SkillsVerification from './pages/SkillsVerification';
+import JobAlerts from './pages/JobAlerts';
+import InterviewCalendar from './pages/InterviewCalendar';
+import VideoResume from './pages/VideoResume';
+import CompanyReviews from './pages/CompanyReviews';
+import SavedJobs from './pages/SavedJobs';
+import NotificationsCenter from './pages/NotificationsCenter';
 import { useState } from 'react';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-[#0a0f1d]">
+    <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-[#0a0f1d] transition-colors duration-300">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black italic text-xl animate-pulse">
           RM
@@ -134,24 +148,39 @@ function App() {
             />
 
             <Routes>
-              {/* Landing Page - Accessible to everyone, but redirects if logged in */}
-              <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-
+              {/* Intro page - for everyone */}
+              <Route path="/" element={<Intro />} />
+              
+              {/* Auth pages */}
+              <Route path="/register" element={<Register />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/resumes" element={<Resumes />} />
+                <Route path="/resume-builder" element={<ResumeBuilder />} />
                 <Route path="/jobs" element={<Jobs />} />
+                <Route path="/my-jobs" element={<MyJobs />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/activities" element={<Activities />} />
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/admin/applicants" element={<AdminApplicants />} />
                 <Route path="/my-applications" element={<MyApplications />} />
                 <Route path="/interview/:applicationId" element={<Interview />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/tests" element={<Tests />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/best-candidates" element={<BestCandidates />} />
+                <Route path="/resume-generator" element={<ResumeGenerator />} />
+                <Route path="/company-profile" element={<CompanyProfile />} />
+                <Route path="/skills-verification" element={<SkillsVerification />} />
+                <Route path="/job-alerts" element={<JobAlerts />} />
+                <Route path="/interview-calendar" element={<InterviewCalendar />} />
+                <Route path="/video-resume" element={<VideoResume />} />
+                <Route path="/company-reviews" element={<CompanyReviews />} />
+                <Route path="/saved-jobs" element={<SavedJobs />} />
+                <Route path="/notifications" element={<NotificationsCenter />} />
               </Route>
 
               {/* Fallback */}

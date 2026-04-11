@@ -13,7 +13,16 @@ import {
   Bell,
   Moon,
   Sun,
-  Clock
+  Clock,
+  Search,
+  MessageCircle,
+  Award,
+  Download,
+  Building2,
+  Calendar,
+  Video,
+  Star,
+  Bookmark
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -26,7 +35,7 @@ import { uz } from 'date-fns/locale';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const { logout, user } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,6 +43,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [hasActiveInterviews, setHasActiveInterviews] = useState(false);
 
   useEffect(() => {
     fetchNotificationData();
@@ -50,9 +60,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         user.role === 'admin' ? applicationsAPI.getNotificationsCount() : Promise.resolve({ data: { count: 0 } })
       ]);
 
-      setNotifications(notifRes.data);
-      const unreadCount = notifRes.data.filter(n => !n.is_read).length;
-      setNotificationCount(unreadCount + (countRes.data.count || 0));
+      setNotifications(notifRes.data || []);
+      const unreadCount = (notifRes.data || []).filter(n => !n.is_read).length;
+      setNotificationCount(unreadCount + (countRes.data?.count || 0));
+
+      // Check for active interviews if user is not admin
+      if (user.role !== 'admin') {
+        try {
+          const appRes = await applicationsAPI.getMyApplications();
+          const apps = appRes.data?.data || appRes.data || [];
+          const activeApps = apps.some(app => app.status === 'interview' && app.ai_interview_data);
+          setHasActiveInterviews(activeApps);
+        } catch (e) {
+          console.error('Error fetching applications:', e);
+        }
+      }
     } catch (error) {
       console.error('Fetch notifications error:', error);
     }
@@ -73,7 +95,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       await notificationsAPI.markAllRead();
       setNotifications(notifications.map(n => ({ ...n, is_read: true })));
       setNotificationCount(user.role === 'admin' ? notificationCount - notifications.filter(n => !n.is_read).length : 0);
-      toast.success("Barcha bildirishnomalar o'qildi");
+      toast.success(t('allNotificationsRead'));
     } catch (error) {
       console.error('Mark all read error:', error);
     }
@@ -85,20 +107,55 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   }, [location.pathname]);
 
   const adminMenuItems = [
-    { id: 'dashboard', path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'jobs', path: '/jobs', icon: Briefcase, label: "Ish O'rinlari" },
-    { id: 'applicants', path: '/admin/applicants', icon: Users, label: 'Nomzodlar', hasBadge: true },
-    { id: 'resumes', path: '/resumes', icon: FileText, label: 'Resumelar' },
-    { id: 'analytics', path: '/analytics', icon: BarChart3, label: 'Statistika' },
+    { id: 'dashboard', path: '/', icon: LayoutDashboard, label: t('dashboard') },
+    { id: 'admin-panel', path: '/admin', icon: Users, label: 'Boshqaruv paneli' },
+    { id: 'jobs', path: '/jobs', icon: Briefcase, label: t('jobs') },
+    { id: 'applicants', path: '/admin/applicants', icon: Users, label: t('applicants'), hasBadge: true },
+    { id: 'resumes', path: '/resumes', icon: FileText, label: t('resumes') },
+    { id: 'analytics', path: '/analytics', icon: BarChart3, label: t('analytics') },
+    { id: 'company-reviews', path: '/company-reviews', icon: Star, label: 'Company Reviews' },
+    { id: 'notifications', path: '/notifications', icon: Bell, label: 'Notifications' },
   ];
 
-  const userMenuItems = [
-    { id: 'jobs', path: '/jobs', icon: Briefcase, label: 'Vakansiyalar' },
-    { id: 'applications', path: '/my-applications', icon: FileText, label: 'Arizalarim' },
-    { id: 'resumes', path: '/resumes', icon: FileText, label: 'Mening Resumem' },
+  const employerMenuItems = [
+    { id: 'my-jobs', path: '/my-jobs', icon: Briefcase, label: t('myJobs') },
+    { id: 'jobs', path: '/jobs', icon: Search, label: t('findJobs') },
+    { id: 'best-candidates', path: '/best-candidates', icon: Award, label: 'Eng yaxshi nomzodlar' },
+    { id: 'company-profile', path: '/company-profile', icon: Building2, label: 'Company Profile' },
+    { id: 'company-reviews', path: '/company-reviews', icon: Star, label: 'Company Reviews' },
+    { id: 'notifications', path: '/notifications', icon: Bell, label: 'Notifications' },
+    { id: 'messages', path: '/messages', icon: MessageCircle, label: 'Xabarlar' },
   ];
 
-  const menuItems = user?.role === 'admin' ? adminMenuItems : userMenuItems;
+  const candidateMenuItems = [
+    { id: 'jobs', path: '/jobs', icon: Briefcase, label: t('jobs') },
+    { id: 'saved-jobs', path: '/saved-jobs', icon: Bookmark, label: 'Saved Jobs' },
+    { id: 'applications', path: '/my-applications', icon: FileText, label: t('myApplications') },
+    { id: 'interview-calendar', path: '/interview-calendar', icon: Calendar, label: 'Interviews' },
+    { id: 'notifications', path: '/notifications', icon: Bell, label: 'Notifications' },
+    { id: 'resumes', path: '/resumes', icon: FileText, label: t('resumes') },
+    { id: 'video-resume', path: '/video-resume', icon: Video, label: 'Video Resume' },
+    { id: 'resume-generator', path: '/resume-generator', icon: Download, label: 'Resume Generator' },
+    { id: 'skills-verification', path: '/skills-verification', icon: Award, label: 'Skills Verification' },
+    { id: 'job-alerts', path: '/job-alerts', icon: Bell, label: 'Job Alerts' },
+    { id: 'company-reviews', path: '/company-reviews', icon: Star, label: 'Company Reviews' },
+    { id: 'tests', path: '/tests', icon: Activity, label: t('tests') },
+    { id: 'messages', path: '/messages', icon: MessageCircle, label: 'Xabarlar' },
+    { id: 'admin-panel', path: '/admin', icon: Users, label: 'Boshqaruv paneli 🎛️', isAdmin: true },
+  ];
+
+  if (user?.role === 'candidate' && hasActiveInterviews) {
+    candidateMenuItems.push({ id: 'ai-interview', path: '/my-applications', icon: Clock, label: t('aiInterview'), isSpecial: true });
+  }
+
+  let menuItems;
+  if (user?.role === 'admin') {
+    menuItems = adminMenuItems;
+  } else if (user?.role === 'employer') {
+    menuItems = employerMenuItems;
+  } else {
+    menuItems = candidateMenuItems;
+  }
 
   const languages = [
     { code: 'uz', name: 'UZB', flag: '🇺🇿' },
@@ -177,7 +234,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-[#121827] animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                   )}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">Bildirishnomalar</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{t('notifications')}</span>
               </div>
               <div className={`transition-transform duration-300 ${showNotifications ? 'rotate-180' : ''}`}>
                 <ChevronDown size={14} />
@@ -188,14 +245,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {showNotifications && (
               <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] rounded-[2rem] shadow-2xl z-[70] overflow-hidden animate-in zoom-in-95 slide-in-from-top-4 duration-300">
                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                  <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">So'nggi xabarlar</span>
-                  <button onClick={handleMarkAllRead} className="text-[8px] font-black uppercase text-indigo-400 hover:text-indigo-300 tracking-widest transition-colors">Barchasini oqish</button>
+                  <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('recentMessages')}</span>
+                  <button onClick={handleMarkAllRead} className="text-[8px] font-black uppercase text-indigo-400 hover:text-indigo-300 tracking-widest transition-colors">{t('markAllRead')}</button>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                   {notifications.length === 0 ? (
                     <div className="p-10 text-center">
                       <Bell className="mx-auto w-8 h-8 text-slate-700 mb-3 opacity-20" />
-                      <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest">Xabarlar yo'q</p>
+                      <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest">{t('noMessages')}</p>
                     </div>
                   ) : (
                     notifications.map((notif, idx) => (
@@ -218,7 +275,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   )}
                 </div>
                 <div className="p-3 bg-white/[0.02] text-center border-t border-white/5">
-                  <button onClick={() => setShowNotifications(false)} className="text-[10px] font-black uppercase text-slate-500 hover:text-white transition-colors tracking-widest">Yopish</button>
+                  <button onClick={() => setShowNotifications(false)} className="text-[10px] font-black uppercase text-slate-500 hover:text-white transition-colors tracking-widest">{t('close')}</button>
                 </div>
               </div>
             )}
@@ -228,10 +285,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {/* Main Navigation */}
         <nav className="flex-1 px-6 space-y-1 mt-2 overflow-y-auto no-scrollbar">
           <div className="px-4 mb-4">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Menu</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('menu')}</span>
           </div>
 
           {menuItems.map((item, index) => {
+            if (item.isAdmin && user?.role !== 'admin') return null;
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
 
@@ -245,7 +303,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   animate-in slide-in-from-left-4 fade-in
                   ${isActive
                     ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : item.isSpecial
+                      ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20 animate-pulse'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }
                 `}
               >
@@ -279,8 +339,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           })}
 
           {/* Account Section */}
-          <div className="px-4 mt-10 mb-4">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Account</span>
+          <div className="px-4 mb-4">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('account')}</span>
           </div>
 
           <button
@@ -306,7 +366,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className={`font-bold text-sm leading-none flex-1 text-left transition-colors ${location.pathname === '/profile' ? 'text-white' : 'text-slate-400 group-hover:text-white'
                 }`}
             >
-              Profil Sozlamalari
+              {t('profileSettings')}
             </span>
           </button>
         </nav>
@@ -364,7 +424,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className="flex flex-col items-center justify-center py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/20 group"
             >
               <LogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />
-              <span className="text-[8px] font-black uppercase tracking-widest mt-0.5">Chiqish</span>
+              <span className="text-[8px] font-black uppercase tracking-widest mt-0.5">{t('logout')}</span>
             </button>
           </div>
 
@@ -377,7 +437,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   onClick={() => {
                     setLanguage(lang.code);
                     setShowLangDropdown(false);
-                    toast.success(`Til ${lang.name} ga o'zgartirildi`);
+                    toast.success(t('languageChanged').replace('{lang}', lang.code === 'uz' ? 'O\'zbekcha' : lang.code === 'ru' ? 'Русский' : 'English'));
                   }}
                   className={`w-full flex items-center justify-between p-3.5 rounded-xl transition-all duration-200 ${language === lang.code
                     ? 'bg-indigo-600/15 text-white'

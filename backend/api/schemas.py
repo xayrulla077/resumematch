@@ -13,10 +13,20 @@ class UserBase(BaseModel):
     profile_image: Optional[str] = None
 
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+
+
 class UserCreate(UserBase):
     password: str
+    role: Optional[str] = "candidate"  # candidate, employer
+    company_name: Optional[str] = None  # For employers
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v):
         """Validate password strength"""
@@ -28,6 +38,14 @@ class UserCreate(UserBase):
             raise ValueError("Parol kamida 1 ta raqam bo'lishi kerak")
         return v
 
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v):
+        """Validate role"""
+        if v not in [None, "candidate", "employer"]:
+            raise ValueError("Role must be 'candidate' or 'employer'")
+        return v or "candidate"
+
 
 class UserLogin(BaseModel):
     username: str
@@ -37,6 +55,8 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: int
     role: str
+    company_name: Optional[str] = None
+    company_logo: Optional[str] = None
     is_active: bool
     created_at: datetime
     last_active: Optional[datetime] = None
@@ -71,10 +91,37 @@ class ResumeResponse(ResumeBase):
     file_size: Optional[int]
     full_name: Optional[str]
     email: Optional[str]
-    skills: Optional[str]
+    phone: Optional[str]
+    skills: List[str] = []
     is_analyzed: bool
+    status: str
     match_score: float
     uploaded_at: datetime
+
+    # Additional fields
+    certifications: Optional[str] = None
+    projects: Optional[str] = None
+    achievements: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+    website: Optional[str] = None
+
+    # AI Analysis
+    ai_strengths: Optional[str] = None
+    ai_missing_skills: Optional[str] = None
+    ai_summary: Optional[str] = None
+
+    @field_validator("skills", mode="before")
+    @classmethod
+    def parse_skills(cls, v):
+        """Skills stringni listga aylantirish"""
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            return [s.strip() for s in v.split(",") if s.strip()]
+        return []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -115,6 +162,16 @@ class JobResponse(JobBase):
     creator_id: int
     is_active: bool
     posted_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class JobWithApplicationsCount(JobBase):
+    id: int
+    creator_id: int
+    is_active: bool
+    posted_at: datetime
+    applications_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -186,14 +243,6 @@ class ActivityLogCreate(ActivityLogBase):
     user_id: int
 
 
-class ActivityLogResponse(ActivityLogBase):
-    id: int
-    user_id: int
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 # Application Schemas
 class ApplicationBase(BaseModel):
     job_id: int
@@ -218,15 +267,32 @@ class ApplicationResponse(ApplicationBase):
     admin_notes: Optional[str] = None
     applied_at: datetime
     reviewed_at: Optional[datetime] = None
-    
+
     # AI Insights
     ai_score: float = 0.0
-    ai_strengths: Optional[List[str]] = None
-    ai_missing_skills: Optional[List[str]] = None
+    ai_strengths: Optional[List[str]] = Field(default_factory=list)
+    ai_missing_skills: Optional[List[str]] = Field(default_factory=list)
     ai_summary: Optional[str] = None
-    
+
+    @field_validator("ai_strengths", "ai_missing_skills", mode="before")
+    @classmethod
+    def parse_json_list(cls, v):
+        """JSON stringni listga aylantirish"""
+        import json
+
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except:
+                return []
+        return []
+
     # AI Interview
-    ai_interview_data: Optional[str] = None # JSON string
+    ai_interview_data: Optional[str] = None  # JSON string
     ai_interview_score: float = 0.0
     ai_interview_feedback: Optional[str] = None
 
@@ -286,7 +352,7 @@ class ApplicantListResponse(BaseModel):
     cover_letter: Optional[str] = None
     ai_score: Optional[float] = None
     ai_summary: Optional[str] = None
-    
+
     # AI Interview fields for admin view
     ai_interview_score: Optional[float] = 0.0
     ai_interview_feedback: Optional[str] = None
@@ -316,3 +382,54 @@ class NotificationResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Resume Builder Schemas
+class ExperienceItem(BaseModel):
+    title: str
+    company: str
+    date_range: str
+    description: str
+
+
+class EducationItem(BaseModel):
+    degree: str
+    institution: str
+    year: str
+
+
+class CertificationItem(BaseModel):
+    name: str
+    issuer: str
+    date: str
+    credential_id: Optional[str] = None
+
+
+class ProjectItem(BaseModel):
+    name: str
+    description: str
+    technologies: List[str] = []
+    link: Optional[str] = None
+
+
+class AchievementItem(BaseModel):
+    title: str
+    description: str
+    date: str
+
+
+class ResumeBuilderData(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    summary: str
+    skills: List[str]
+    experience: List[ExperienceItem]
+    education: List[EducationItem]
+    languages: List[str] = []
+    certifications: List[CertificationItem] = []
+    projects: List[ProjectItem] = []
+    achievements: List[AchievementItem] = []
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+    website: Optional[str] = None

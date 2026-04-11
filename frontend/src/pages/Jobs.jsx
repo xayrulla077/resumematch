@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { jobsAPI, resumesAPI, applicationsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
 import {
   Briefcase,
@@ -27,6 +26,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Pagination from '../components/Pagination';
+import JobCard from '../components/JobCard';
 
 // ─── Skeleton Loader ──────────────────────────────────────────────────────────
 
@@ -54,9 +54,8 @@ const JobCardSkeleton = () => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Jobs = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
-  const { theme } = useTheme();
 
   // Data state
   const [jobs, setJobs] = useState([]);
@@ -72,6 +71,7 @@ const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterLocation, setFilterLocation] = useState('');
+  const [activeTab, setActiveTab] = useState('all'); // 'all' or 'recommended'
 
   // Modals state
   const [showApplyModal, setShowApplyModal] = useState(false);
@@ -94,23 +94,42 @@ const Jobs = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  // Stats state
+  const [stats, setStats] = useState({
+    activeJobs: 0,
+    newApplications: 0,
+    totalCompanies: 0,
+    growth: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
   // ── Data Fetching ───────────────────────────────────────────────────────────
 
   const loadJobs = async () => {
     try {
       setLoading(true);
-      const response = await jobsAPI.getAll({
-        page: currentPage,
-        limit: itemsPerPage,
-        search: searchTerm.trim() || undefined,
-        employment_type: filterType !== 'all' ? filterType : undefined,
-        location: filterLocation.trim() || undefined
-      });
+      let response;
+      
+      if (activeTab === 'recommended') {
+        response = await jobsAPI.getRecommended({
+          page: currentPage,
+          limit: itemsPerPage,
+        });
+      } else {
+        response = await jobsAPI.getAll({
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchTerm.trim() || undefined,
+          employment_type: filterType !== 'all' ? filterType : undefined,
+          location: filterLocation.trim() || undefined
+        });
+      }
+      
       setJobs(response.data.items || []);
-      setTotalItems(response.data.metadata.total || 0);
+      setTotalItems(response.data.metadata?.total || 0);
     } catch (error) {
       console.error('Jobs load error:', error);
-      toast.error("Vakansiyalarni yuklashda xatolik yuz berdi");
+      toast.error("Vakansiyalarni yuklashda xatolik yuz berdi: " + (error.message || ''));
     } finally {
       setLoading(false);
     }
@@ -125,9 +144,46 @@ const Jobs = () => {
     }
   };
 
+  const loadStats = async () => {
+    try {
+      setStatsLoading(true);
+      // Get jobs count
+      const jobsRes = await jobsAPI.getAll({ limit: 1 });
+      const activeJobs = jobsRes.data.metadata?.total || 0;
+      
+      // Get all jobs for company count
+      const allJobsRes = await jobsAPI.getAll({ limit: 100 });
+      const jobsList = allJobsRes.data.items || [];
+      const uniqueCompanies = new Set(jobsList.map(j => j.company)).size;
+      
+      // Get actual applications count from jobs
+      const newApplications = jobsList.reduce((sum, job) => sum + (job.applications_count || 0), 0);
+      
+      // Simple growth calculation based on recent jobs
+      const recentJobs = jobsList.filter(j => {
+        const postedDate = new Date(j.posted_at);
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        return postedDate > weekAgo;
+      }).length;
+      const growthPercent = activeJobs > 0 ? Math.round((recentJobs / activeJobs) * 100) : 0;
+      
+      setStats({
+        activeJobs,
+        newApplications,
+        totalCompanies: uniqueCompanies,
+        growth: growthPercent
+      });
+    } catch (error) {
+      console.error('Stats load error:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadJobs();
-  }, [currentPage, searchTerm, filterType, filterLocation]);
+    loadStats();
+  }, [currentPage, searchTerm, filterType, filterLocation, activeTab]);
 
   useEffect(() => {
     loadResumes();
@@ -168,11 +224,13 @@ const Jobs = () => {
 
     try {
       setSubmitting(true);
+      console.log('Applying to job:', selectedJob.id, 'with resume:', selectedResume);
       await applicationsAPI.apply(selectedJob.id, parseInt(selectedResume), coverLetter);
       toast.success("Arizangiz muvaffaqiyatli qabul qilindi! 🎉");
       setShowApplyModal(false);
     } catch (error) {
-      toast.error("Xatolik: " + (error.response?.data?.detail || error.message));
+      console.error('Apply error:', error);
+      toast.error("Xatolik: " + (error.response?.data?.detail || error.message || 'Network error'));
     } finally {
       setSubmitting(false);
     }
@@ -292,40 +350,85 @@ const Jobs = () => {
               Sizga mos keladigan eng yaxshi ishlarni toping
             </p>
           </div>
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin' || user?.role === 'employer') && (
             <button
               onClick={handleAddJob}
               className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-indigo-600/25 transition-all active:scale-95 group flex items-center gap-3"
             >
               <Plus className="group-hover:rotate-90 transition-transform duration-500" size={20} />
-              Yangi Vakansiya
+              {t('addNewJob') || 'Yangi Vakansiya'}
             </button>
           )}
         </div>
 
+        {/* Tabs for candidates */}
+        {user?.role === 'candidate' && (
+          <div className="flex gap-4">
+            <button
+              onClick={() => { setActiveTab('all'); setCurrentPage(1); }}
+              className={`px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider transition-all ${
+                activeTab === 'all' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+              }`}
+            >
+              Barcha vakansiyalar
+            </button>
+            <button
+              onClick={() => { setActiveTab('recommended'); setCurrentPage(1); }}
+              className={`px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider transition-all flex items-center gap-2 ${
+                activeTab === 'recommended' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+              }`}
+            >
+              <TrendingUp size={18} />
+              Mening uchun tavsiyalar
+            </button>
+          </div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { label: 'Faol Ishlar', value: totalItems, icon: Briefcase, color: 'indigo' },
-            { label: 'Yangi Arizalar', value: '12', icon: Users, color: 'blue' },
-            { label: 'Mualliflar', value: '5', icon: Building2, color: 'purple' },
-            { label: 'O\'sish', value: '+24%', icon: TrendingUp, color: 'emerald' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="relative overflow-hidden group p-6 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-xl transition-all hover:translate-y-[-4px]">
-              <div className="absolute -right-4 -top-4 opacity-5 scale-150 rotate-12 group-hover:scale-110 transition-transform duration-700">
-                <Icon className={`w-32 h-32 text-${color}-500`} />
+          {statsLoading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="relative overflow-hidden group p-6 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-xl animate-pulse">
+                <div className="h-10 w-10 bg-white/10 rounded-2xl mb-4"></div>
+                <div className="h-3 w-20 bg-white/10 rounded mb-2"></div>
+                <div className="h-8 w-16 bg-white/10 rounded"></div>
               </div>
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{label}</h4>
-                  <p className="text-3xl font-black text-[var(--text-main)]">{value}</p>
+            ))
+          ) : (
+            [
+              { label: 'Faol Ishlar', value: stats.activeJobs, icon: Briefcase, color: 'indigo' },
+              { label: 'Yangi Arizalar', value: stats.newApplications, icon: Users, color: 'blue' },
+              { label: 'Kompaniyalar', value: stats.totalCompanies, icon: Building2, color: 'purple' },
+              { label: 'O\'sish', value: `${stats.growth > 0 ? '+' : ''}${stats.growth}%`, icon: TrendingUp, color: 'emerald' },
+            ].map(({ label, value, icon: Icon, color }) => {
+              const colorClasses = {
+                indigo: 'text-indigo-500',
+                blue: 'text-blue-500',
+                purple: 'text-purple-500',
+                emerald: 'text-emerald-500',
+              };
+              return (
+                <div key={label} className="relative overflow-hidden group p-6 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-xl transition-all hover:translate-y-[-4px]">
+                  <div className="absolute -right-4 -top-4 opacity-5 scale-150 rotate-12 group-hover:scale-110 transition-transform duration-700">
+                    <Icon className={`w-32 h-32 ${colorClasses[color]}`} />
+                  </div>
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{label}</h4>
+                      <p className="text-3xl font-black text-[var(--text-main)]">{value}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-main)] flex items-center justify-center text-indigo-400">
+                      <Icon size={22} />
+                    </div>
+                  </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-main)] flex items-center justify-center text-indigo-400">
-                  <Icon size={22} />
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
 
         {/* Search & Filter Bar */}
@@ -407,76 +510,19 @@ const Jobs = () => {
           <div className="space-y-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {jobs.map((job, idx) => (
-                <div
+                <JobCard
                   key={job.id}
-                  className="group relative p-8 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl hover:border-indigo-500/40 transition-all duration-500 flex flex-col animate-in fade-in zoom-in-95"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="flex justify-between items-start mb-8">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-600/20 text-indigo-500 flex items-center justify-center transition-all group-hover:bg-indigo-600 group-hover:text-white shadow-lg">
-                      <Briefcase size={24} />
-                    </div>
-                    {user?.role === 'admin' && (
-                      <div className="flex gap-2">
-                        <button onClick={() => handleEditJob(job)} className="p-3 bg-white/5 hover:bg-indigo-600 text-[var(--text-muted)] hover:text-white rounded-xl transition-all border border-white/5 shadow-xl">
-                          <Edit size={16} />
-                        </button>
-                        <button onClick={() => handleDeleteConfirm(job.id)} className="p-3 bg-white/5 hover:bg-rose-600 text-[var(--text-muted)] hover:text-white rounded-xl transition-all border border-white/5 shadow-xl">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-2 mb-6">
-                    <h3 className="text-2xl font-black text-[var(--text-main)] group-hover:text-indigo-500 transition-colors uppercase tracking-tight leading-none">
-                      {job.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-indigo-500 font-black text-[10px] uppercase tracking-[0.2em]">
-                      <Building2 size={12} />
-                      {job.company}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-8">
-                    <div className="flex items-center gap-3 text-[var(--text-muted)] font-bold text-xs bg-white/5 p-3 rounded-2xl border border-white/5">
-                      <MapPin size={16} className="text-indigo-400" />
-                      {job.location || 'Noma\'lum'}
-                    </div>
-                    <div className="flex items-center gap-3 text-[var(--text-muted)] font-bold text-xs bg-white/5 p-3 rounded-2xl border border-white/5">
-                      <DollarSign size={16} className="text-emerald-500" />
-                      <span className="text-[var(--text-main)]">{job.salary || 'Kelishiladi'}</span>
-                    </div>
-                  </div>
-
-                  <div className="mb-8">
-                    <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border ${getEmploymentColor(job.employment_type)}`}>
-                      {getEmploymentLabel(job.employment_type)}
-                    </span>
-                  </div>
-
-                  <div className="pt-8 border-t border-white/5 mt-auto">
-                    {user?.role !== 'admin' ? (
-                      <button
-                        onClick={() => handleApply(job)}
-                        className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 group/btn shadow-xl shadow-indigo-600/20 active:scale-95"
-                      >
-                        Ariza Topshirish
-                        <ChevronRight className="group-hover/btn:translate-x-1 transition-transform" size={16} />
-                      </button>
-                    ) : (
-                      <div className="w-full py-4 px-6 bg-[var(--bg-main)]/50 rounded-2xl border border-[var(--border-main)] flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Users size={18} className="text-indigo-400" />
-                          <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Nomzodlar soni</span>
-                        </div>
-                        <span className="text-sm font-black text-indigo-500 bg-indigo-500/10 px-3 py-1 rounded-lg">
-                          0
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  job={job}
+                  idx={idx}
+                  user={user}
+                  activeTab={activeTab}
+                  getEmploymentColor={getEmploymentColor}
+                  getEmploymentLabel={getEmploymentLabel}
+                  onApply={handleApply}
+                  onEdit={handleEditJob}
+                  onDelete={handleDeleteConfirm}
+                  t={t}
+                />
               ))}
             </div>
 
@@ -651,7 +697,7 @@ const Jobs = () => {
                 disabled={submitting}
                 className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[1.25rem] font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center"
               >
-                {submitting ? <Loader2 className="animate-spin" size={20} /> : editingJob ? 'Saqlash' : 'E\'lon qilsh'}
+                {submitting ? <Loader2 className="animate-spin" size={20} /> : editingJob ? 'Saqlash' : "E'lon qilish"}
               </button>
             </div>
           </div>

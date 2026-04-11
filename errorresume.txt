@@ -1,0 +1,37 @@
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+2AuthContext.jsx:13 Auth check - token exists: false
+AuthContext.jsx:37 Login success, token: received
+AuthContext.jsx:43 User data fetched: Object
+dashboard:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/stats' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Dashboard.jsx:188 Dashboard load error: AxiosError
+loadDashboardData @ Dashboard.jsx:188Пояснение к ошибке
+127.0.0.1:8000/api/stats:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+2recharts.js?v=6fb9e423:9045 The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+warn2 @ recharts.js?v=6fb9e423:9045Пояснение к предупреждению
+dashboard:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?limit=5' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?limit=5:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+dashboard:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/stats' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Dashboard.jsx:188 Dashboard load error: AxiosError
+loadDashboardData @ Dashboard.jsx:188Пояснение к ошибке
+127.0.0.1:8000/api/stats:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+dashboard:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?limit=5' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?limit=5:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+jobs:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?limit=100' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Jobs.jsx:142 Resumes load error: AxiosError
+loadResumes @ Jobs.jsx:142Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?limit=100:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+jobs:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?limit=100' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Jobs.jsx:142 Resumes load error: AxiosError
+loadResumes @ Jobs.jsx:142Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?limit=100:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+resumes:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?page=1&limit=10' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Resumes.jsx:34 Resumes load error: AxiosError
+loadResumes @ Resumes.jsx:34Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?page=1&limit=10:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке
+resumes:1 Access to XMLHttpRequest at 'http://127.0.0.1:8000/api/resumes/?page=1&limit=10' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Пояснение к ошибке
+Resumes.jsx:34 Resumes load error: AxiosError
+loadResumes @ Resumes.jsx:34Пояснение к ошибке
+127.0.0.1:8000/api/resumes/?page=1&limit=10:1  Failed to load resource: net::ERR_FAILEDПояснение к ошибке

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { adminAPI } from '../lib/api';
+import { adminAPI, analyticsAPI, jobsAPI } from '../lib/api';
+import { toast } from 'sonner';
 import {
   Settings,
   Users,
@@ -48,14 +49,25 @@ const AdminPanel = () => {
   // Users State
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [allJobs, setAllJobs] = useState([]);
 
   useEffect(() => {
     loadStats();
     loadUsers();
+    loadJobs();
     // Poll system stats every 10 seconds
     const interval = setInterval(loadSystemMetrics, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  const loadJobs = async () => {
+    try {
+      const response = await jobsAPI.getAll({ limit: 100 });
+      setAllJobs(response.data.items || []);
+    } catch (error) {
+      console.error('Jobs load error:', error);
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -142,6 +154,20 @@ const AdminPanel = () => {
     return 'from-rose-500 to-red-500';
   };
 
+  const statColorClasses = {
+    indigo: { bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', shadow: 'shadow-indigo-500/5', text: 'text-indigo-400' },
+    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', shadow: 'shadow-purple-500/5', text: 'text-purple-400' },
+    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', shadow: 'shadow-amber-500/5', text: 'text-amber-400' },
+  };
+
+  const btnColorClasses = {
+    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
+    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400' },
+    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400' },
+    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400' },
+    indigo: { bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400' },
+  };
+
   const handleExport = async (type) => {
     try {
       let response;
@@ -155,6 +181,16 @@ const AdminPanel = () => {
         case 'jobs':
           response = await analyticsAPI.exportJobs();
           filename = 'ishlar_ro\'yxati.xlsx';
+          break;
+        case 'applicants':
+          if (allJobs.length === 0) {
+            toast.error('Ishlar topilmadi');
+            return;
+          }
+          // Export first job's applicants as example, or show a job selector
+          const job = allJobs[0];
+          response = await analyticsAPI.exportApplicants(job.id);
+          filename = `nomzodlar_${job.title.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
           break;
         default:
           response = await analyticsAPI.exportAll();
@@ -233,10 +269,10 @@ const AdminPanel = () => {
           ].map((stat, idx) => (
             <div key={idx} className="p-8 rounded-[2.5rem] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] shadow-2xl relative overflow-hidden group">
               <div className="flex items-center justify-between mb-6">
-                <div className={`w-14 h-14 bg-${stat.color}-500/10 rounded-2xl flex items-center justify-center border border-${stat.color}-500/20 shadow-lg shadow-${stat.color}-500/5`}>
-                  <stat.icon className={`text-${stat.color}-400`} size={28} />
+                <div className={`w-14 h-14 ${statColorClasses[stat.color].bg} rounded-2xl flex items-center justify-center border ${statColorClasses[stat.color].border} shadow-lg ${statColorClasses[stat.color].shadow}`}>
+                  <stat.icon className={statColorClasses[stat.color].text} size={28} />
                 </div>
-                <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 bg-white/5 rounded-xl border border-[var(--border-main)] text-[var(--text-main)]`}>
+                <span className="text-xs font-black uppercase tracking-widest px-3 py-1 bg-white/5 rounded-xl border border-[var(--border-main)] text-[var(--text-main)]">
                   {stat.value}%
                 </span>
               </div>
@@ -331,7 +367,10 @@ const AdminPanel = () => {
                 </div>
               </div>
 
-              <button className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-3">
+              <button 
+                onClick={() => toast.info("AI model yangilash tez kunda qo'shiladi")}
+                className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-3"
+              >
                 <RefreshCw size={18} />
                 {t('updateModel')}
               </button>
@@ -348,7 +387,7 @@ const AdminPanel = () => {
             <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tight uppercase">{t('backupExport')}</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
             <div className="p-6 bg-[var(--bg-main)]/50 rounded-2xl border border-[var(--border-main)] flex flex-col justify-center">
               <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-2">{t('lastBackup')}</p>
               <p className="font-black text-[var(--text-main)] text-xs tracking-widest">{systemStatus.lastBackup}</p>
@@ -358,15 +397,16 @@ const AdminPanel = () => {
               { label: t('createBackup'), icon: Upload, fn: handleBackup, color: 'blue' },
               { label: t('exportResumes'), icon: Download, fn: () => handleExport('resumes'), color: 'purple' },
               { label: t('exportJobs'), icon: Download, fn: () => handleExport('jobs'), color: 'emerald' },
-              { label: t('exportAll'), icon: Download, fn: () => handleExport('all'), color: 'amber' }
+              { label: t('exportAll'), icon: Download, fn: () => handleExport('all'), color: 'amber' },
+              { label: t('exportApplicants'), icon: Download, fn: () => handleExport('applicants'), color: 'indigo' }
             ].map((btn, idx) => (
               <button
                 key={idx}
                 onClick={btn.fn}
-                className={`p-6 bg-[var(--bg-main)]/50 hover:bg-${btn.color}-500/10 rounded-2xl border border-[var(--border-main)] hover:border-${btn.color}-500/20 transition-all group/btn flex flex-col items-center justify-center gap-3 active:scale-95 text-[var(--text-main)] font-black`}
+                className={`p-6 bg-[var(--bg-main)]/50 hover:${btnColorClasses[btn.color].bg} rounded-2xl border border-[var(--border-main)] hover:${btnColorClasses[btn.color].border} transition-all group/btn flex flex-col items-center justify-center gap-3 active:scale-95 text-[var(--text-main)] font-black`}
               >
-                <div className={`p-3 bg-${btn.color}-500/10 rounded-xl group-hover/btn:scale-110 transition-transform`}>
-                  <btn.icon className={`text-${btn.color}-400`} size={20} />
+                <div className={`p-3 ${btnColorClasses[btn.color].bg} rounded-xl group-hover/btn:scale-110 transition-transform`}>
+                  <btn.icon className={btnColorClasses[btn.color].text} size={20} />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.1em] text-center">{btn.label}</span>
               </button>
@@ -383,7 +423,10 @@ const AdminPanel = () => {
               </div>
               <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tight uppercase">{t('userManagement')}</h2>
             </div>
-            <button className="h-12 bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center gap-3">
+            <button 
+              onClick={() => toast.info("Foydalanuvchi qo'shish tez kunda qo'shiladi")}
+              className="h-12 bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 flex items-center gap-3"
+            >
               <UserPlus size={18} />
               {t('addUser')}
             </button>

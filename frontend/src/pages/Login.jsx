@@ -20,8 +20,8 @@ const Login = () => {
     const navigate = useNavigate();
 
     const usernameError = touched.username && !username.trim() ? "Username majburiy" : '';
-    const passwordError = touched.password && password.length < 6 ? "Parol kamida 6 ta belgi" : '';
-    const isValid = username.trim() && password.length >= 6;
+    const passwordError = touched.password && password.length < 8 ? "Parol kamida 8 ta belgi, katta harf va raqam" : '';
+    const isValid = username.trim() && password.length >= 8;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,9 +33,9 @@ const Login = () => {
         try {
             await login(username, password);
             toast.success("Muvaffaqiyatli kirdingiz! Xush kelibsiz 🎉");
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
-            const msg = err.response?.data?.detail || "Login va parolni tekshiring.";
+            const msg = err?.response?.data?.detail || err?.message || "Login va parolni tekshiring.";
             setError(msg);
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ const Login = () => {
                     <div className="space-y-6 py-8">
                         <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-main)] leading-tight">
                             Xush kelibsiz{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Back!</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Dashboard!</span>
                         </h2>
                         <p className="text-[var(--text-muted)] font-bold leading-relaxed text-base lg:text-lg">
                             Kelajakni AI bilan quring. Rezyumelarni saralash va intervyularni boshqarish endi ancha osonroq.
@@ -113,7 +113,7 @@ const Login = () => {
                                 <input
                                     type="text"
                                     required
-                                    className={`w-full bg-[var(--bg-main)]/50 border rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-slate-600 ${usernameError
+                                    className={`w-full bg-[var(--bg-input)] border rounded-2xl py-4 pl-12 pr-5 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-[var(--text-muted)] ${usernameError
                                         ? 'border-rose-500 focus:ring-rose-500/30'
                                         : 'border-[var(--border-main)] focus:ring-indigo-500/30 focus:border-indigo-500'
                                         }`}
@@ -142,7 +142,7 @@ const Login = () => {
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     required
-                                    className={`w-full bg-[var(--bg-main)]/50 border rounded-2xl py-4 pl-12 pr-12 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-slate-600 ${passwordError
+                                    className={`w-full bg-[var(--bg-input)] border rounded-2xl py-4 pl-12 pr-12 text-[var(--text-main)] font-bold text-sm focus:ring-2 outline-none transition-all placeholder:text-[var(--text-muted)] ${passwordError
                                         ? 'border-rose-500 focus:ring-rose-500/30'
                                         : 'border-[var(--border-main)] focus:ring-indigo-500/30 focus:border-indigo-500'
                                         }`}
@@ -189,7 +189,7 @@ const Login = () => {
                                 <span className="w-full border-t border-[var(--border-main)]" />
                             </div>
                             <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
-                                <span className="bg-[var(--bg-main)] px-4 text-[var(--text-muted)]">Yoki</span>
+                                <span className="bg-[var(--bg-card)] px-4 text-[var(--text-muted)]">Yoki</span>
                             </div>
                         </div>
 
