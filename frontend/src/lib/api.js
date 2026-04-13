@@ -55,6 +55,15 @@ export const resumesAPI = {
     delete: (id) => api.delete(`/resumes/${id}`),
     getAIFeedback: (id) => api.post(`/resumes/${id}/ai-feedback`),
     download: (id) => api.get(`/resumes/${id}/download`, { responseType: 'blob' }),
+    // Task 5: Template support
+    generatePDF: (data, template = 'modern') => api.post('/resumes/generate-pdf', { ...data, template }, { responseType: 'blob' }),
+};
+
+export const careerAPI = {
+    generateCoverLetter: (resumeId, jobId) => api.post('/career/generate-cover-letter', null, { params: { resume_id: resumeId, job_id: jobId } }),
+    analyzeSkillGap: (resumeId, jobId) => api.post('/career/skill-gap-analysis', null, { params: { resume_id: resumeId, job_id: jobId } }),
+    getCareerPath: () => api.get('/career/career-path'),
+    getLearningPath: (skill) => api.get(`/career/learning-path/${skill}`),
 };
 
 export const jobsAPI = {

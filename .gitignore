@@ -52,3 +52,7 @@ logs/
 # Uploads / Data
 backend/uploads/
 uploads/
+
+# IDE
+.idea/
+.vscode/

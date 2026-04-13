@@ -1,11 +1,14 @@
 import os
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from jinja2 import Template
 from typing import Optional
 from datetime import datetime
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -20,15 +23,13 @@ FROM_NAME = os.getenv("FROM_NAME", "Resume Matcher")
 # Enable/disable email sending
 EMAIL_ENABLED = bool(SMTP_SERVER and SMTP_USERNAME)
 
-print(
-    f"Email config: enabled={EMAIL_ENABLED}, server={SMTP_SERVER}, user={SMTP_USERNAME}"
-)
+logger.info(f"Email config: enabled={EMAIL_ENABLED}, server={SMTP_SERVER}")
 
 
 def send_email(to_email: str, subject: str, body: str, html: bool = False) -> bool:
     """Send email to recipient"""
     if not EMAIL_ENABLED:
-        print(f"Email disabled - would send to {to_email}: {subject}")
+        logger.debug(f"Email disabled - would send to {to_email}: {subject}")
         return False
 
     try:
@@ -48,10 +49,10 @@ def send_email(to_email: str, subject: str, body: str, html: bool = False) -> bo
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.send_message(msg)
 
-        print(f"Email sent to {to_email}: {subject}")
+        logger.info(f"Email sent to {to_email}: {subject}")
         return True
     except Exception as e:
-        print(f"Email send error: {e}")
+        logger.error(f"Email send error: {e}")
         return False
 
 

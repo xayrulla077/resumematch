@@ -1,16 +1,58 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
-from typing import Optional, List, Dict
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    field_validator,
+    ConfigDict,
+    model_validator,
+)
+from typing import Optional, List, Dict, Any
 from datetime import datetime
+from utils.security import (
+    sanitize_input,
+    sanitize_html_content,
+    sanitize_filename,
+    sanitize_url,
+    sanitize_phone,
+)
 
 
 # User Schemas
 class UserBase(BaseModel):
     email: EmailStr
-    username: str
+    username: str = Field(..., min_length=3, max_length=30)
     full_name: Optional[str] = None
     phone: Optional[str] = None
     bio: Optional[str] = None
     profile_image: Optional[str] = None
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def sanitize_username(cls, v: Any) -> str:
+        if v is None:
+            return v
+        return sanitize_input(str(v), max_length=30)
+
+    @field_validator("full_name", "bio", mode="before")
+    @classmethod
+    def sanitize_text_fields(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_input(str(v), max_length=2000)
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def sanitize_phone_field(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_phone(str(v))
+
+    @field_validator("profile_image", mode="before")
+    @classmethod
+    def sanitize_url_field(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_url(str(v))
 
 
 class UserUpdate(BaseModel):
@@ -81,6 +123,13 @@ class GoogleToken(BaseModel):
 class ResumeBase(BaseModel):
     file_name: str
 
+    @field_validator("file_name", mode="before")
+    @classmethod
+    def sanitize_file_name(cls, v: Any) -> str:
+        if v is None:
+            return "unnamed"
+        return sanitize_filename(str(v))
+
 
 class ResumeCreate(ResumeBase):
     pass
@@ -140,13 +189,32 @@ class ResumeAnalysisResult(BaseModel):
 
 # Job Schemas
 class JobBase(BaseModel):
-    title: str
-    company: str
-    location: Optional[str]
-    salary: Optional[str]
+    title: str = Field(..., min_length=3, max_length=200)
+    company: str = Field(..., min_length=2, max_length=200)
+    location: Optional[str] = None
+    salary: Optional[str] = None
     employment_type: str
-    description: Optional[str]
-    requirements: Optional[str]
+    description: Optional[str] = None
+    requirements: Optional[str] = None
+
+    @field_validator("title", "company", mode="before")
+    @classmethod
+    def sanitize_required_fields(cls, v: Any) -> str:
+        return sanitize_input(str(v), max_length=200)
+
+    @field_validator("location", "salary", mode="before")
+    @classmethod
+    def sanitize_optional_text(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_input(str(v), max_length=200)
+
+    @field_validator("description", "requirements", mode="before")
+    @classmethod
+    def sanitize_html_fields(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_html_content(str(v), max_length=50000)
 
 
 class JobCreate(JobBase):
@@ -248,6 +316,13 @@ class ApplicationBase(BaseModel):
     job_id: int
     resume_id: int
     cover_letter: Optional[str] = None
+
+    @field_validator("cover_letter", mode="before")
+    @classmethod
+    def sanitize_cover_letter(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_html_content(str(v), max_length=10000)
 
 
 class ApplicationCreate(ApplicationBase):
@@ -380,6 +455,11 @@ class NotificationResponse(BaseModel):
     notification_type: str
     is_read: bool
     created_at: datetime
+
+    @field_validator("title", "message", mode="before")
+    @classmethod
+    def sanitize_notification_fields(cls, v: Any) -> str:
+        return sanitize_input(str(v), max_length=2000)
 
     model_config = ConfigDict(from_attributes=True)
 

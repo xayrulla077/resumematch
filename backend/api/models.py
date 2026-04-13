@@ -32,6 +32,11 @@ class User(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_active = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    # Security fields
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
+    password_changed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
     # Relationships
     resumes = relationship("Resume", back_populates="user")
     jobs = relationship("Job", back_populates="creator")

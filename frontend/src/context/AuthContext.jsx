@@ -11,15 +11,13 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkUser = async () => {
             const token = localStorage.getItem('token');
-            console.log('Auth check - token exists:', !!token);
             if (token) {
                 try {
                     const response = await api.get('/auth/me');
-                    console.log('Auth check - user data:', response.data);
                     setUser(response.data);
                     setAuthError(false);
                 } catch (error) {
-                    console.error("Auth check failed:", error.response?.status, error.response?.data);
+                    console.error("Auth check failed:", error.response?.status);
                     // Token mavjud ammo tekshirish muvaffaqiyatsiz - tokenni olib tashlamasdan, qayta urinish
                     if (error.response?.status === 401) {
                         // Token yaroqsiz - olib tashlash
@@ -44,13 +42,11 @@ export const AuthProvider = ({ children }) => {
         const response = await api.post('/auth/login', formData);
         const { access_token } = response.data;
 
-        console.log('Login success, token:', access_token ? 'received' : 'MISSING');
         localStorage.setItem('token', access_token);
 
         try {
             // Fetch user details immediately after login
             const userMe = await api.get('/auth/me');
-            console.log('User data fetched:', userMe.data);
             setUser(userMe.data);
             setAuthError(false);
             return userMe.data;
@@ -63,10 +59,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (userData) => {
-        console.log('Register called with:', userData);
-        await api.post('/auth/register', userData);
-        console.log('Register success, auto-login...');
+const register = async (userData) => {
+        try {
+            const response = await api.post('/auth/register', userData);
         // Auto login after register and return user data
         return await login(userData.username, userData.password);
     };

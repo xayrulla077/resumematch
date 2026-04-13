@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { jobsAPI, resumesAPI, applicationsAPI } from '../services/api';
+import { jobsAPI, resumesAPI, applicationsAPI, careerAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -23,7 +23,10 @@ import {
   CheckCircle2,
   ChevronRight,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Zap,
+  BookOpen
 } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import JobCard from '../components/JobCard';
@@ -62,6 +65,8 @@ const Jobs = () => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [skillGap, setSkillGap] = useState(null);
 
   // Pagination & Filtering
   const [currentPage, setCurrentPage] = useState(1);
@@ -205,6 +210,42 @@ const Jobs = () => {
 
   // ── Actions ─────────────────────────────────────────────────────────────────
 
+  const handleGenerateCoverLetter = async () => {
+    if (!selectedResume) {
+      toast.error("Iltimos, avval rezyumeni tanlang!");
+      return;
+    }
+    
+    try {
+      setAiLoading(true);
+      const response = await careerAPI.generateCoverLetter(parseInt(selectedResume), selectedJob.id);
+      setCoverLetter(response.data.cover_letter);
+      toast.success("AI siz uchun muqova xatini tayyorladi! ✨");
+    } catch (error) {
+      toast.error("AI bilan bog'lanishda xatolik");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleSkillGapAnalysis = async () => {
+    if (!selectedResume) {
+      toast.error("Iltimos, avval rezyumeni tanlang!");
+      return;
+    }
+    
+    try {
+      setAiLoading(true);
+      const response = await careerAPI.analyzeSkillGap(parseInt(selectedResume), selectedJob.id);
+      setSkillGap(response.data);
+      toast.success("Skill Gap tahlili tayyor! 🧐");
+    } catch (error) {
+      toast.error("Tahlil qilishda xatolik");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleApply = (job) => {
     if (resumes.length === 0) {
       toast.error("Ariza yuborishdan oldin kamida bitta rezyume yuklashingiz kerak!");
@@ -213,6 +254,7 @@ const Jobs = () => {
     setSelectedJob(job);
     setSelectedResume('');
     setCoverLetter('');
+    setSkillGap(null);
     setShowApplyModal(true);
   };
 
@@ -567,7 +609,7 @@ const Jobs = () => {
                   {resumes.map(r => (
                     <button
                       key={r.id}
-                      onClick={() => setSelectedResume(String(r.id))}
+                      onClick={() => { setSelectedResume(String(r.id)); setSkillGap(null); }}
                       className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left ${selectedResume === String(r.id)
                         ? 'bg-indigo-600/20 border-indigo-600 text-white'
                         : 'bg-white/5 border-white/5 text-slate-400 hover:border-white/20'}`}
@@ -584,6 +626,55 @@ const Jobs = () => {
                   ))}
                 </div>
               </div>
+
+              {/* AI Tools Section */}
+              {selectedResume && (
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleGenerateCoverLetter}
+                    disabled={aiLoading}
+                    className="flex-1 py-3 px-4 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-2xl text-purple-400 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                  >
+                    {aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    AI Muqova Xati
+                  </button>
+                  <button
+                    onClick={handleSkillGapAnalysis}
+                    disabled={aiLoading}
+                    className="flex-1 py-3 px-4 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 rounded-2xl text-amber-400 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                  >
+                    {aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                    Skill Gap Tahlili
+                  </button>
+                </div>
+              )}
+
+              {/* Skill Gap Results */}
+              {skillGap && (
+                <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 space-y-4 animate-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2 text-amber-500 uppercase font-black text-[10px] tracking-widest">
+                    <AlertCircle size={14} />
+                    Yetishmayotgan ko'nikmalar
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {skillGap.missing_skills.map(s => (
+                      <span key={s} className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-lg text-[10px] font-bold">{s}</span>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">O'rganish yo'li (AI Tavsiyasi)</p>
+                    {skillGap.learning_path.map((path, index) => (
+                      <div key={index} className="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="text-[11px] font-black text-white">{path.skill}</p>
+                          <span className="text-[9px] font-bold text-amber-500">{path.time_estimate}</span>
+                        </div>
+                        <p className="text-[9px] text-slate-400 leading-relaxed">{path.resources.join(', ')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Qo'shimcha ma'lumot</label>

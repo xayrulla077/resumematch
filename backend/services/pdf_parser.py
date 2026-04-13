@@ -1,4 +1,5 @@
 import warnings
+import logging
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -11,6 +12,8 @@ from typing import Optional, Dict, Any
 import google.generativeai as genai
 import json
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -28,7 +31,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 def extract_text_from_pdf(file_path: str) -> str:
     """PDF dan matn ajratish (OCR bilan)"""
     if not os.path.exists(file_path):
-        print(f"File not found: {file_path}")
+        logger.error(f"File not found: {file_path}")
         return ""
 
     text = ""
@@ -42,11 +45,11 @@ def extract_text_from_pdf(file_path: str) -> str:
                     if page_text:
                         text += page_text + "\n"
             except Exception as pdf_err:
-                print(f"Normal PDF read error (might be image-only): {pdf_err}")
+                logger.warning(f"PDF read error (might be image-only): {pdf_err}")
 
         # 2. Agar matn juda oz bo'lsa yoki bo'sh bo'lsa (Skanerlangan PDF)
         if len(text.strip()) < 50:
-            print(f"OCR ishga tushirildi: {file_path}")
+            logger.info(f"OCR ishga tushirildi: {file_path}")
             try:
                 # Memory optimization: DPI ni kamaytiramiz va faqat birinchi bir necha sahifani o'qiymiz
                 # Render Free tierda memory juda kam (512MB)
@@ -59,13 +62,13 @@ def extract_text_from_pdf(file_path: str) -> str:
                         text += ocr_text + "\n"
                         del image
                 except MemoryError:
-                    print(f"Memory Error during OCR for {file_path}. Skipping OCR.")
-                    text += "\n[Xatolik: Fayl juda katta yoki xotira yetishmadi. Faqat matnli qismi olindi.]"
+                    logger.error(f"Memory Error during OCR: {file_path}")
+                    text += "\n[Xatolik: Fayl juda katta yoki xotira yetishmadi.]"
             except Exception as ocr_err:
-                print(f"OCR Process error: {ocr_err}")
+                logger.error(f"OCR Process error: {ocr_err}")
 
     except Exception as e:
-        print(f"Critical PDF/OCR extraction error: {e}")
+        logger.error(f"Critical PDF/OCR extraction error: {e}")
 
     return text
 

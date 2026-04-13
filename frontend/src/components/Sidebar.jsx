@@ -31,11 +31,11 @@ import { useState, useEffect } from 'react';
 import { applicationsAPI, notificationsAPI } from '../services/api';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
-import { uz } from 'date-fns/locale';
+import { getLocale } from '../context/LanguageContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const { logout, user } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, t, locale } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -267,7 +267,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         <div className="flex items-center gap-2">
                           <Clock size={10} className="text-slate-600" />
                           <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
-                            {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: uz })}
+                            {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale })}
                           </span>
                         </div>
                       </div>

@@ -8,7 +8,10 @@ from datetime import datetime
 from services.ai_service import analyze_resume_with_ai
 from services.matcher import calculate_hybrid_score
 import json
+import logging
 from utils.activity_logger import log_activity
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -32,10 +35,10 @@ async def process_application_ai_background(application_id: int):
         )
 
         if not application:
-            print(f"ERROR Background Application AI: Ariza {application_id} topilmadi")
+            logger.error(f"Application {application_id} not found")
             return
 
-        print(f"BACKGROUND TASK: AI Analysis for Application {application_id}")
+        logger.info(f"AI Analysis for Application {application_id}")
 
         # Resume va Job matnlarini tayyorlash
         resume = application.resume
@@ -66,10 +69,10 @@ async def process_application_ai_background(application_id: int):
             )
 
         db.commit()
-        print(f"BACKGROUND TASK SUCCESS: Application {application_id} analyzed by AI")
+        logger.info(f"Application {application_id} analyzed by AI")
 
     except Exception as e:
-        print(f"CRITICAL ERROR in Application AI Task: {e}")
+        logger.error(f"Application AI Task error: {e}")
     finally:
         db.close()
 

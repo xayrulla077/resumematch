@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -9,6 +10,7 @@ import os
 import json
 import logging
 import traceback
+import secrets
 from datetime import datetime
 from typing import Any, Dict
 
@@ -41,11 +43,19 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
 
-        # Add extra fields
-        if hasattr(record, "user_id"):
-            log_data["user_id"] = record.user_id
-        if hasattr(record, "request_id"):
-            log_data["request_id"] = record.request_id
+        # Add extra fields (using try/except to avoid attribute errors)
+        try:
+            if getattr(record, "user_id", None):
+                log_data["user_id"] = record.user_id
+        except Exception:
+            pass
+
+        try:
+            if getattr(record, "request_id", None):
+                log_data["request_id"] = record.request_id
+        except Exception:
+            pass
+
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
 
@@ -58,8 +68,9 @@ logging.basicConfig(
     level=logging.DEBUG,
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("logs/app.log", encoding="utf-8")
+        logging.FileHandler("logs/app.log", encoding="utf-8"),
     ],
+    # Remove custom formatter that's causing issues
 )
 
 logger = logging.getLogger(__name__)
@@ -121,14 +132,60 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 # Global Exception Handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    error_id = secrets.token_hex(8)
     error_detail = traceback.format_exc()
-    logger.error(f"Unhandled error: {error_detail}")
-    return JSONResponse(
-        status_code=500, content={"detail": "Ichki server xatoligi yuz berdi."} # Hid traceback from client
+
+    # Structured logging
+    logger.error(
+        f"error_id={error_id} error={error_detail[:500]}",
+        extra={"request_id": request.headers.get("X-Request-ID"), "error_id": error_id},
     )
 
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Ichki server xatoligi yuz berdi.", "error_id": error_id},
+    )
+
+
+# HTTPException Handler
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+# Request Validation Error Handler
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        errors.append(
+            {
+                "field": ".".join(str(loc) for loc in error["loc"]),
+                "message": error["msg"],
+            }
+        )
+
+    return JSONResponse(
+        status_code=422, content={"detail": "Validatsiya xatoligi", "errors": errors}
+    )
+
+
 # CORS - faqat ruxsat berilgan originlar
-CORS_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000,http://127.0.0.1:8000,http://localhost:8000").split(",")
+CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+]
+
+# Env dan kelgan originlarni qo'shish
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    CORS_ORIGINS.extend(env_origins.split(","))
 
 app.add_middleware(
     CORSMiddleware,
@@ -136,6 +193,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 # Create uploads directory
 os.makedirs("uploads", exist_ok=True)
@@ -196,6 +254,7 @@ def health(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
+        logger.error(f"Database health check failed: {e}")
         db_status = f"error: {str(e)}"
 
     import psutil

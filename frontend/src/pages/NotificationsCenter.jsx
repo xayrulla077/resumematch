@@ -19,10 +19,10 @@ import {
 } from 'lucide-react';
 import { notificationsAPI } from '../lib/api';
 import { formatDistanceToNow } from 'date-fns';
-import { uz } from 'date-fns/locale';
+import { getLocale } from '../context/LanguageContext';
 
 const NotificationsCenter = () => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { user } = useAuth();
   
   const [notifications, setNotifications] = useState([]);
@@ -110,7 +110,7 @@ const NotificationsCenter = () => {
   const formatTime = (dateString) => {
     if (!dateString) return '';
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: uz });
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale });
     } catch {
       return '';
     }

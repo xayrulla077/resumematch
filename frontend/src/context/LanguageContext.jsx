@@ -1,4 +1,11 @@
 import { createContext, useState, useContext } from 'react';
+import { uz, ru, enUS } from 'date-fns/locale';
+
+const locales = {
+  uz: uz,
+  ru: ru,
+  en: enUS
+};
 
 const translations = {
   uz: {
@@ -688,8 +695,10 @@ export const LanguageProvider = ({ children }) => {
     return langTranslations[key] || key;
   };
 
+  const currentLocale = locales[language] || locales.uz;
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t, locale: currentLocale }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -701,4 +710,8 @@ export const useLanguage = () => {
     throw new Error('useLanguage must be used within LanguageProvider');
   }
   return context;
+};
+
+export const getLocale = (lang) => {
+  return locales[lang] || locales.uz;
 };

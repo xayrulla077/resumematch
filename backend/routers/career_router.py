@@ -3,11 +3,51 @@ from sqlalchemy.orm import Session
 from api.database import get_db
 from api import models
 from api.auth import get_current_active_user
-from services.ai_service import get_resume_feedback
+from services.ai_service import get_resume_feedback, generate_cover_letter, analyze_skill_gap
 from typing import Dict, Any, List
 import json
 
 router = APIRouter()
+
+
+@router.post("/generate-cover-letter")
+async def cover_letter_endpoint(
+    resume_id: int,
+    job_id: int,
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """AI orqali professional Cover Letter tayyorlash"""
+    resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+
+    if not resume or not job:
+        raise HTTPException(status_code=404, detail="Resume yoki Job topilmadi")
+
+    # Extract text (in real case we might use stored summary or extract again)
+    resume_text = f"Full Name: {resume.full_name}\nSummary: {resume.summary}\nSkills: {resume.skills}"
+    job_text = f"Title: {job.title}\nDescription: {job.description}\nRequirements: {job.requirements}"
+
+    result = await generate_cover_letter(resume_text, job_text)
+    return result
+
+
+@router.post("/skill-gap-analysis")
+async def skill_gap_endpoint(
+    resume_id: int,
+    job_id: int,
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """AI orqali nomzodning ko'nikmalaridagi bo'shliqlarni (gap) tahlil qilish"""
+    resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+
+    if not resume or not job:
+        raise HTTPException(status_code=404, detail="Resume yoki Job topilmadi")
+
+    result = await analyze_skill_gap(resume.skills or "", job.required_skills or "")
+    return result
 
 
 @router.get("/career-path")

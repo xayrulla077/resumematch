@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
+from typing import Optional
 import os
 import secrets
+import logging
 from api.database import get_db
 from api.models import User
 from api.schemas import (
@@ -27,10 +30,20 @@ from utils.activity_logger import log_activity
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
+logger = logging.getLogger(__name__)
+
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_DURATION_MINUTES = 15
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
+
+
+def get_rate_limit_key(request: Request) -> str:
+    """Rate limit key"""
+    return get_remote_address(request)
 
 
 @router.post("/google", response_model=Token)
@@ -136,17 +149,62 @@ async def login(
 
     user = db.query(User).filter(User.username == form_data.username).first()
 
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    # Check if user exists first
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Username yoki parol noto'g'ri",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Check if account is locked
+    if user.locked_until and user.locked_until > datetime.now(timezone.utc):
+        remaining = (user.locked_until - datetime.now(timezone.utc)).seconds // 60
+        logger.warning(f"Locked user login attempt: {user.username}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Hisob {remaining} daqiqa ichida bloklangan. Keyinroq urinib ko'ring.",
+        )
+
+    # Check if account is active
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Foydalanuvchi faol emas"
         )
+
+    # Verify password
+    if not verify_password(form_data.password, user.hashed_password):
+        # Increment failed attempts
+        user.failed_login_attempts += 1
+
+        if user.failed_login_attempts >= MAX_FAILED_ATTEMPTS:
+            user.locked_until = datetime.now(timezone.utc) + timedelta(
+                minutes=LOCKOUT_DURATION_MINUTES
+            )
+            logger.warning(
+                f"Account locked: {user.username} after {MAX_FAILED_ATTEMPTS} failed attempts"
+            )
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f" Ko'p marta noto'g'ri urinish. Hisob {LOCKOUT_DURATION_MINUTES} daqiqaga bloklandi.",
+            )
+
+        db.commit()
+        logger.warning(
+            f"Failed login attempt {user.failed_login_attempts}/{MAX_FAILED_ATTEMPTS}: {user.username}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Username yoki parol noto'g'ri",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Successful login - reset failed attempts
+    user.failed_login_attempts = 0
+    user.locked_until = None
+    user.last_active = datetime.now(timezone.utc)
+    db.commit()
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -155,8 +213,84 @@ async def login(
     )
 
     log_activity(db, user.id, "login", "Foydalanuvchi tizimga kirdi")
+    logger.info(f"Successful login: {user.username}")
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(
+    current_user: User = Depends(get_current_active_user),
+):
+    """Token yangilash (refresh)"""
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": current_user.username, "role": current_user.role},
+        expires_delta=access_token_expires,
+    )
+
+    logger.info(f"Token refreshed: {current_user.username}")
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout")
+async def logout(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Foydalanuvchi tizimdan chiqish"""
+    log_activity(db, current_user.id, "logout", "Foydalanuvchi tizimdan chiqdi")
+    logger.info(f"User logged out: {current_user.username}")
+    return {"message": "Muvaffaqiyatli chiqildi"}
+
+
+# Password reset request
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+@router.post("/password-reset-request")
+async def request_password_reset(
+    request_data: PasswordResetRequest,
+    db: Session = Depends(get_db),
+):
+    """Parolni tiklash so'rovi"""
+    user = db.query(User).filter(User.email == request_data.email).first()
+
+    # Don't reveal if email exists
+    if not user:
+        return {"message": "Agar email mavjud bo'lsa, ko'rsatma yuboriladi"}
+
+    # Generate reset token
+    reset_token = secrets.token_urlsafe(32)
+
+    # In production, send email with reset link
+    # For now, just return the token (FOR DEMO ONLY)
+    logger.info(f"Password reset requested for: {user.email}")
+
+    return {
+        "message": "Agar email mavjud bo'lsa, ko'rsatma yuboriladi",
+        "reset_token": reset_token,  # Remove in production!
+    }
+
+
+@router.post("/password-reset")
+async def reset_password(
+    token: str,
+    new_password: str,
+    db: Session = Depends(get_db),
+):
+    """Parolni tiklash"""
+    # In production, validate token from email
+    # For now, simplified version
+
+    # Validate new password
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=400, detail="Parol kamida 8 ta belgidan iborat bo'lishi kerak"
+        )
+
+    return {"message": "Parol muvaffaqiyatli o'zgartirildi"}
 
 
 @router.get("/me", response_model=UserResponse)

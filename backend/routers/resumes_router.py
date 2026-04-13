@@ -2,18 +2,27 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Backgro
 from typing import List, Dict, Any
 import os
 import re
+import logging
 from datetime import datetime
 from sqlalchemy.orm import Session
 from api.database import get_db, SessionLocal
 from api import models, schemas
 from api.auth import get_current_active_user
 from utils.helpers import safe_filename
+from utils.security import (
+    sanitize_filename,
+    validate_file_extension,
+    validate_file_content,
+    validate_mime_type,
+)
 from services.pdf_parser import extract_text_from_pdf, parse_resume_smart
 from services.ai_service import get_resume_feedback
 from sqlalchemy import or_
 from utils.activity_logger import log_activity
 from services.pdf_generator import generate_resume_pdf
 import json
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
@@ -32,7 +41,7 @@ async def process_resume_background(resume_id: int):
     try:
         resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
         if not resume:
-            print(f"ERROR Background Task: Resume {resume_id} topilmadi")
+            logger.error(f"Resume {resume_id} not found for background processing")
             return
 
         # Statusni o'zgartirish
@@ -40,18 +49,25 @@ async def process_resume_background(resume_id: int):
         db.commit()
 
         # 1. Text extraction (OCR bilan)
-        print(f"BACKGROUND TASK: Extracting text from {resume.file_path}")
-        text = extract_text_from_pdf(resume.file_path)
+        logger.info(f"Extracting text from resume {resume_id}")
+        try:
+            text = extract_text_from_pdf(resume.file_path)
+        except Exception as e:
+            logger.error(f"PDF extraction failed for resume {resume_id}: {e}")
+            resume.status = "failed"
+            resume.summary = "Matn ajratishda xatolik yuz berdi."
+            db.commit()
+            return
 
         if not text or len(text.strip()) < 10:
             resume.status = "failed"
             resume.summary = "Matn ajratishda xatolik yuz berdi yoki fayl bo'sh."
             db.commit()
-            print(f"BACKGROUND TASK FAILED: Text extraction failed for {resume_id}")
+            logger.warning(f"Empty or invalid text extracted for resume {resume_id}")
             return
 
         # 2. Gemini AI Parsing
-        print(f"BACKGROUND TASK: AI Smart Parsing for {resume_id}")
+        logger.info(f"AI parsing for resume {resume_id}")
         try:
             analysis = await parse_resume_smart(text)
 
@@ -69,15 +85,15 @@ async def process_resume_background(resume_id: int):
             resume.status = "completed"
             resume.analyzed_at = datetime.now()
 
-            print(f"BACKGROUND TASK SUCCESS: Resume {resume_id} analyzed successfully")
+            logger.info(f"Resume {resume_id} analyzed successfully")
         except Exception as ai_err:
             resume.status = "failed"
             resume.summary = f"AI tahlilida xatolik: {str(ai_err)}"
-            print(f"BACKGROUND TASK FAILED: AI Parsing error for {resume_id}: {ai_err}")
+            logger.error(f"AI parsing failed for resume {resume_id}: {ai_err}")
 
         db.commit()
     except Exception as e:
-        print(f"CRITICAL BACKGROUND ERROR: {e}")
+        logger.error(f"Critical background error for resume {resume_id}: {e}")
     finally:
         db.close()
 
@@ -215,18 +231,24 @@ async def upload_resume(
     Faqat faylni saqlaydi va tahlilni BackgroundTask ga topshiradi.
     """
 
-    # File type validation
-    if not file.filename.endswith(".pdf"):
+    # Sanitize filename
+    clean_filename = sanitize_filename(file.filename)
+
+    # File extension validation
+    if not validate_file_extension(clean_filename):
+        logger.warning(
+            f"Invalid file extension: {clean_filename} from user {current_user.id}"
+        )
         raise HTTPException(status_code=400, detail="Faqat PDF fayl qabul qilinadi")
 
     # Read file content
     content = await file.read()
 
-    # File size validation (10MB)
-    if len(content) > 10 * 1024 * 1024:
-        raise HTTPException(
-            status_code=400, detail="Fayl hajmi 10MB dan oshmasligi kerak"
-        )
+    # File content validation (magic bytes)
+    is_valid, error_msg = validate_file_content(content)
+    if not is_valid:
+        logger.warning(f"Invalid file content: {error_msg} from user {current_user.id}")
+        raise HTTPException(status_code=400, detail=error_msg)
 
     # Sanitize filename
     clean_filename = safe_filename(file.filename)
