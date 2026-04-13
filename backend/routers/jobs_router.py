@@ -5,11 +5,28 @@ from api.database import get_db
 from api import models, schemas
 from api.auth import get_current_active_user
 from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
 
 router = APIRouter()
 
+class RecommendedJobResponse(BaseModel):
+    id: int
+    title: str
+    company: str
+    location: Optional[str] = None
+    salary: Optional[str] = None
+    employment_type: Optional[str] = None
+    description: Optional[str] = None
+    requirements: Optional[str] = None
+    posted_at: Optional[datetime] = None
+    match_score: float = 0.0
 
-from sqlalchemy import or_
+class PaginatedRecommendedJobsResponse(BaseModel):
+    items: List[RecommendedJobResponse]
+    metadata: schemas.PaginationMetadata
+
+@router.post("/", response_model=schemas.JobResponse)
 from utils.activity_logger import log_activity
 
 
@@ -261,7 +278,7 @@ async def update_job(
     return job
 
 
-@router.get("/recommended")
+@router.get("/recommended", response_model=PaginatedRecommendedJobsResponse)
 async def get_recommended_jobs(
     page: int = 1,
     limit: int = 10,
@@ -271,10 +288,11 @@ async def get_recommended_jobs(
     """Candidate uchun tavsiya etilgan ishlar - uning resume skills bo'yicha"""
     if current_user.role == "employer" or current_user.role == "admin":
         raise HTTPException(
-            status_code=400, detail="Bu funksiya faqat candidatelar uchun"
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Bu funksiya faqat candidatelar uchun"
         )
 
-    # Validate page and limit - handle potential string values
+    # Validate page and limit
     try:
         page = max(1, int(page))
         limit = max(1, min(100, int(limit)))
@@ -290,23 +308,29 @@ async def get_recommended_jobs(
     if not user_resumes:
         return {
             "items": [],
-            "metadata": {"total": 0, "page": page, "limit": limit, "total_pages": 0},
-            "message": "Rezyume topilmadi",
+            "metadata": {"total": 0, "page": page, "limit": limit, "total_pages": 0}
         }
 
     # Barcha resume skilllarini yig'ish
     all_skills = set()
     for resume in user_resumes:
         if resume.skills:
-            for skill in resume.skills.split(","):
-                all_skills.add(skill.strip().lower())
-
-    if not all_skills:
-        return {
-            "items": [],
-            "metadata": {"total": 0, "page": page, "limit": limit, "total_pages": 0},
-            "message": "Rezyumada skills topilmadi",
-        }
+            # skills string (comma separated) yoki JSON array bo'lishi mumkin
+            import json
+            try:
+                # Agar JSON bo'lsa
+                skills_list = json.loads(resume.skills)
+                if isinstance(skills_list, list):
+                    for s in skills_list:
+                        all_skills.add(str(s).strip().lower())
+                else:
+                    for s in str(resume.skills).split(","):
+                        all_skills.add(s.strip().lower())
+            except:
+                # Agar oddiy string bo'lsa
+                for s in str(resume.skills).split(","):
+                    if s.strip():
+                        all_skills.add(s.strip().lower())
 
     skip = (page - 1) * limit
 
@@ -331,14 +355,21 @@ async def get_recommended_jobs(
     for job in jobs:
         job_skills = set()
         if job.required_skills:
-            for skill in job.required_skills.split(","):
-                job_skills.add(skill.strip().lower())
+            # Xuddi resume skills kabi split qilamiz
+            import json
+            try:
+                sk_list = json.loads(job.required_skills)
+                if isinstance(sk_list, list):
+                    job_skills = set(str(s).strip().lower() for s in sk_list if s)
+                else:
+                    job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
+            except:
+                job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
 
-        if job_skills:
+        match_score = 0.0
+        if job_skills and all_skills:
             matched = all_skills.intersection(job_skills)
             match_score = (len(matched) / len(job_skills)) * 100
-        else:
-            match_score = 0
 
         results.append(
             {
@@ -350,7 +381,7 @@ async def get_recommended_jobs(
                 "employment_type": job.employment_type,
                 "description": job.description,
                 "requirements": job.requirements,
-                "posted_at": job.posted_at.isoformat() if job.posted_at else None,
+                "posted_at": job.posted_at,
                 "match_score": round(match_score, 1),
             }
         )
@@ -358,7 +389,7 @@ async def get_recommended_jobs(
     # Match score bo'yicha saralash
     results.sort(key=lambda x: x.get("match_score", 0), reverse=True)
 
-    total_pages = (total + limit - 1) // limit
+    total_pages = (total + limit - 1) // limit if limit > 0 else 0
 
     return {
         "items": results,

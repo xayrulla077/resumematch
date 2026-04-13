@@ -46,7 +46,7 @@ const CompanyProfile = () => {
 
   const loadProfile = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/companies/profile', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/companies/profile`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -74,9 +74,7 @@ const CompanyProfile = () => {
       setSaving(true);
       
       const isNew = !profile.id;
-      const url = isNew 
-        ? 'http://127.0.0.1:8000/api/companies/profile'
-        : 'http://127.0.0.1:8000/api/companies/profile';
+      const url = `${import.meta.env.VITE_API_URL}/api/companies/profile`;
       
       const method = isNew ? 'POST' : 'PUT';
       

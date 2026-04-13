@@ -405,7 +405,7 @@ const VideoResume = () => {
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
               >
-                <source src={`http://127.0.0.1:8000/uploads/videos/${selectedVideo.file_path?.split('/').pop()}`} type="video/mp4" />
+                <source src={`${import.meta.env.VITE_API_URL}/uploads/videos/${selectedVideo.file_path?.split('/').pop()}`} type="video/mp4" />
                 Your browser does not support video playback.
               </video>
             </div>

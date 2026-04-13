@@ -46,12 +46,10 @@ const Resumes = () => {
   const handleFileUpload = async (file) => {
     if (!file) return;
     
-    const formData = new FormData();
-    formData.append('file', file);
     setUploading(true);
     
     try {
-      await resumesAPI.upload(formData);
+      await resumesAPI.upload(file);
       toast.success(t('resumeUploadSuccess') || "Rezyume muvaffaqiyatli yuklandi");
       setFileName('');
       loadResumes();
@@ -106,7 +104,7 @@ const Resumes = () => {
 
   const handleAnalyze = async (id) => {
     try {
-      await resumesAPI.analyze(id);
+      await resumesAPI.getAIFeedback(id);
       toast.success(t('analysisStarted') || "Tahlil boshlandi");
       loadResumes();
     } catch (error) {

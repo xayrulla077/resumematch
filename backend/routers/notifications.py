@@ -7,7 +7,7 @@ from typing import List
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.NotificationResponse])
+@router.get("", response_model=List[schemas.NotificationResponse])
 async def get_notifications(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { resumesAPI, jobsAPI } from '../services/api';
+import { resumesAPI, jobsAPI, skillsVerificationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -55,6 +55,10 @@ const ResumeGenerator = () => {
     languages: []
   });
 
+  const [skillSearch, setSkillSearch] = useState('');
+  const [skillSuggestions, setSkillSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   useEffect(() => {
     loadResumes();
   }, []);
@@ -62,7 +66,7 @@ const ResumeGenerator = () => {
   const loadResumes = async () => {
     try {
       setLoading(true);
-      const response = await resumesAPI.getMyResumes();
+      const response = await resumesAPI.getAll();
       const resumeList = response.data?.items || [];
       setResumes(resumeList);
       
@@ -79,6 +83,20 @@ const ResumeGenerator = () => {
   const selectResume = (resume) => {
     setSelectedResume(resume);
     // Parse resume data
+    let skillsArray = [];
+    if (resume.skills) {
+      if (typeof resume.skills === 'string') {
+        try {
+          const parsed = JSON.parse(resume.skills);
+          skillsArray = Array.isArray(parsed) ? parsed : resume.skills.split(',').map(s => s.trim()).filter(s => s);
+        } catch (e) {
+          skillsArray = resume.skills.split(',').map(s => s.trim()).filter(s => s);
+        }
+      } else if (Array.isArray(resume.skills)) {
+        skillsArray = resume.skills;
+      }
+    }
+
     setResumeData({
       full_name: user?.full_name || '',
       title: resume.title || 'Professional',
@@ -87,10 +105,10 @@ const ResumeGenerator = () => {
       location: resume.location || '',
       linkedin: user?.linkedin || '',
       summary: resume.summary || '',
-      skills: resume.skills || '',
-      experience: resume.experience ? JSON.parse(resume.experience) : [],
-      education: resume.education ? JSON.parse(resume.education) : [],
-      languages: resume.languages ? JSON.parse(resume.languages) : []
+      skills: skillsArray,
+      experience: resume.experience ? (typeof resume.experience === 'string' ? JSON.parse(resume.experience) : resume.experience) : [],
+      education: resume.education ? (typeof resume.education === 'string' ? JSON.parse(resume.education) : resume.education) : [],
+      languages: resume.languages ? (typeof resume.languages === 'string' ? JSON.parse(resume.languages) : resume.languages) : []
     });
   };
 
@@ -142,6 +160,41 @@ const ResumeGenerator = () => {
     }));
   };
 
+  const handleSkillSearch = async (query) => {
+    setSkillSearch(query);
+    if (query.length > 1) {
+      try {
+        const response = await skillsVerificationAPI.getSuggestions(query);
+        setSkillSuggestions(response.data || []);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error('Skill suggestions error:', error);
+      }
+    } else {
+      setSkillSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const addSkill = (skillName) => {
+    const trimmed = skillName.trim();
+    if (trimmed && !resumeData.skills.includes(trimmed)) {
+      setResumeData(prev => ({
+        ...prev,
+        skills: [...prev.skills, trimmed]
+      }));
+    }
+    setSkillSearch('');
+    setShowSuggestions(false);
+  };
+
+  const removeSkill = (skillToRemove) => {
+    setResumeData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(s => s !== skillToRemove)
+    }));
+  };
+
   const generatePdf = async () => {
     try {
       setGenerating(true);
@@ -158,7 +211,7 @@ const ResumeGenerator = () => {
           title: resumeData.title,
           location: resumeData.location,
           summary: resumeData.summary,
-          skills: resumeData.skills.split(',').map(s => s.trim()).filter(s => s),
+          skills: resumeData.skills,
           experience: resumeData.experience,
           education: resumeData.education,
           languages: resumeData.languages
@@ -166,7 +219,7 @@ const ResumeGenerator = () => {
         template: selectedTemplate
       };
 
-      const response = await fetch('http://127.0.0.1:8000/api/resumes/generate-pdf', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/resumes/generate-pdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,19 +417,42 @@ const ResumeGenerator = () => {
             <h3 className="font-black text-[var(--text-main)] mb-4 flex items-center gap-2">
               <Code size={20} /> Ko'nikmalar
             </h3>
-            <textarea
-              placeholder="Skillslarni vergul bilan yozing (masalan: Python, JavaScript, React, SQL)"
-              value={resumeData.skills}
-              onChange={(e) => handleInputChange('skills', e.target.value)}
-              rows={3}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl py-3 px-4 font-bold"
-            />
-            {resumeData.skills && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {resumeData.skills.split(',').map((skill, i) => (
-                  <span key={i} className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold">
-                    {skill.trim()}
-                  </span>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Skill qidiring yoki yozing..."
+                value={skillSearch}
+                onChange={(e) => handleSkillSearch(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addSkill(skillSearch)}
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl py-3 px-4 font-bold outline-none focus:border-indigo-500 transition-colors"
+              />
+              {showSuggestions && skillSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-2 bg-[var(--bg-surface)] border border-[var(--border-main)] rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+                  {skillSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => addSkill(s.skill)}
+                      className="w-full text-left px-4 py-3 hover:bg-indigo-600/10 text-[var(--text-main)] font-medium transition-colors flex items-center justify-between"
+                    >
+                      <span>{s.skill}</span>
+                      <span className="text-[10px] uppercase font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">{s.badge}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {resumeData.skills.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {resumeData.skills.map((skill, i) => (
+                  <div key={i} className="group flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-xl text-sm font-black animate-in zoom-in-50 duration-200">
+                    {skill}
+                    <button 
+                      onClick={() => removeSkill(skill)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-rose-400"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -533,10 +609,10 @@ const ResumeGenerator = () => {
                 </div>
               )}
               
-              {resumeData.skills && (
+              {resumeData.skills.length > 0 && (
                 <div className="mb-6">
                   <h2 className="text-lg font-bold border-b border-gray-300 mb-2">Skills</h2>
-                  <p className="text-sm">{resumeData.skills}</p>
+                  <p className="text-sm">{resumeData.skills.join(', ')}</p>
                 </div>
               )}
               

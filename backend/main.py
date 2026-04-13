@@ -115,6 +115,7 @@ app = FastAPI(
     title="Resume Matcher API",
     description="AI-powered resume and job matching platform",
     version="1.0.0",
+    redirect_slashes=False,
 )
 
 # Rate limiter state ni qo'shish

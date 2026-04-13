@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import { skillsVerificationAPI } from '../services/api';
 import {
   Award,
   Plus,
@@ -41,13 +42,8 @@ const SkillsVerification = () => {
 
   const loadSkills = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/skills/verification/my-skills', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSkills(data);
-      }
+      const response = await skillsVerificationAPI.getMySkills();
+      setSkills(response.data);
     } catch (error) {
       console.error('Load skills error:', error);
     } finally {
@@ -57,12 +53,8 @@ const SkillsVerification = () => {
 
   const loadSuggestions = async () => {
     try {
-      const query = searchTerm ? `?query=${searchTerm}` : '';
-      const response = await fetch(`http://127.0.0.1:8000/api/skills/verification/suggestions${query}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data);
-      }
+      const response = await skillsVerificationAPI.getSuggestions(searchTerm);
+      setSuggestions(response.data);
     } catch (error) {
       console.error('Load suggestions error:', error);
     }
@@ -70,11 +62,8 @@ const SkillsVerification = () => {
 
   const loadLeaderboard = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/skills/verification/leaderboard');
-      if (response.ok) {
-        const data = await response.json();
-        setLeaderboard(data);
-      }
+      const response = await skillsVerificationAPI.getLeaderboard();
+      setLeaderboard(response.data);
     } catch (error) {
       console.error('Load leaderboard error:', error);
     }
@@ -83,19 +72,13 @@ const SkillsVerification = () => {
   const addSkill = async (skillName, badge = 'bronze', issuer = '') => {
     try {
       setAdding(true);
-      const response = await fetch('http://127.0.0.1:8000/api/skills/verification/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          skill_name: skillName,
-          issued_by: issuer
-        })
-      });
+      const data = {
+        skill_name: skillName,
+        issued_by: issuer
+      };
+      const response = await skillsVerificationAPI.verify(data);
       
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         toast.success(`${skillName} skilli qo'shildi!`);
         loadSkills();
         loadLeaderboard();
@@ -110,12 +93,8 @@ const SkillsVerification = () => {
 
   const deleteSkill = async (skillId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/skills/verification/${skillId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      
-      if (response.ok) {
+      const response = await skillsVerificationAPI.delete(skillId);
+      if (response.status === 200) {
         toast.success('Skill o\'chirildi');
         loadSkills();
       }

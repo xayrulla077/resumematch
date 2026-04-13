@@ -191,6 +191,14 @@ export const reviewsAPI = {
     getTopSalaries: (limit) => api.get('/reviews/salary/top', { params: { limit } }),
 };
 
+export const skillsVerificationAPI = {
+    getMySkills: () => api.get('/skills/verification/my-skills'),
+    getSuggestions: (query) => api.get('/skills/verification/suggestions', { params: { query } }),
+    getLeaderboard: () => api.get('/skills/verification/leaderboard'),
+    verify: (data) => api.post('/skills/verification/verify', data),
+    delete: (id) => api.delete(`/skills/verification/${id}`),
+};
+
 export const savedJobsAPI = {
     saveJob: (jobId, notes) => api.post('/user/saved-jobs', null, { params: { job_id: jobId, notes } }),
     getSavedJobs: () => api.get('/user/saved-jobs'),
