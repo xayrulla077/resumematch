@@ -110,6 +110,16 @@ def generate_resume_from_template(data: dict, template: str = "modern"):
     return pdf.output(dest="S").encode("latin-1", "replace")
 
 
+def generate_resume_pdf(data: dict, output_path: str):
+    """
+    Sodda ko'rinishda Resume PDF yaratish va faylga saqlash.
+    """
+    pdf_content = generate_resume_from_template(data)
+    with open(output_path, "wb") as f:
+        f.write(pdf_content)
+    return output_path
+
+
 def generate_applicant_report_pdf(
     job_title: str, applicants: list, output_path: str = None
 ):
