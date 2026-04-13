@@ -181,20 +181,25 @@ CORS_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "https://frontend-production-c28ee.up.railway.app",
+    "https://resumematch-production-cb46.up.railway.app", # Ba'zan backend o'ziga o'zi so'rov yuborishi mumkin
 ]
 
 # Env dan kelgan originlarni qo'shish va tozalash
 env_origins = os.getenv("ALLOWED_ORIGINS")
 if env_origins:
-    CORS_ORIGINS.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+    if env_origins == "*":
+        CORS_ORIGINS = ["*"]
+    else:
+        CORS_ORIGINS.extend([o.strip() for o in env_origins.split(",") if o.strip()])
 
-# Agar production bo'lmasa yoki hamma joydan ruxsat kerak bo'lsa (faqat test uchun)
-# CORS_ORIGINS = ["*"] 
+# Logging CORS origins to help debug
+print(f"CORS origins configured: {CORS_ORIGINS}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=True if CORS_ORIGINS != ["*"] else False, # Credentials not allowed with "*"
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
