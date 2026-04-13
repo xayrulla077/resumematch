@@ -20,4 +20,4 @@ COPY backend/ .
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "1", "-b", "0.0.0.0:$PORT", "main:app"]
+CMD gunicorn -k uvicorn.workers.UvicornWorker -w 1 -b 0.0.0.0:$PORT main:app
