@@ -182,10 +182,13 @@ CORS_ORIGINS = [
     "http://localhost:8000",
 ]
 
-# Env dan kelgan originlarni qo'shish
+# Env dan kelgan originlarni qo'shish va tozalash
 env_origins = os.getenv("ALLOWED_ORIGINS")
 if env_origins:
-    CORS_ORIGINS.extend(env_origins.split(","))
+    CORS_ORIGINS.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+
+# Agar production bo'lmasa yoki hamma joydan ruxsat kerak bo'lsa (faqat test uchun)
+# CORS_ORIGINS = ["*"] 
 
 app.add_middleware(
     CORSMiddleware,
