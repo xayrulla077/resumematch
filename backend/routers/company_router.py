@@ -170,7 +170,7 @@ async def get_public_company_profile(
     return profile
 
 
-@router.get("/companies")
+@router.get("/")
 async def list_companies(
     industry: Optional[str] = None,
     size: Optional[str] = None,
