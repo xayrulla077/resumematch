@@ -159,10 +159,8 @@ async def get_top_skills(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Eng ko'p talab qilingan ko'nikmalar (faqat admin)"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Faqat adminlar ko'ra oladi")
-
+    """Eng ko'p talab qilingan ko'nikmalar"""
+    # Removed admin check to allow candidates to see trends
     date_limit = datetime.now(timezone.utc) - timedelta(days=days)
     all_jobs = (
         db.query(models.Job.required_skills)

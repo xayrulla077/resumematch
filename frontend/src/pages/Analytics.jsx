@@ -243,8 +243,8 @@ const Analytics = () => {
                 </p>
               </div>
             ) : (
-              <div className="h-[280px] lg:h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[280px] lg:h-[350px] w-full" style={{ minHeight: '280px' }}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                   <LineChart data={monthly}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }} dy={10} />
@@ -275,8 +275,8 @@ const Analytics = () => {
             {loading ? (
               <ChartSkeleton height="h-[280px] lg:h-[350px]" />
             ) : (
-              <div className="h-[280px] lg:h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[280px] lg:h-[350px] w-full" style={{ minHeight: '280px' }}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                   <PieChart>
                     <Pie data={matchData} cx="50%" cy="50%" innerRadius="35%" outerRadius="60%" paddingAngle={8} dataKey="value">
                       {matchData.map((entry, i) => (
@@ -312,8 +312,8 @@ const Analytics = () => {
               <p className="text-slate-500 font-black text-[10px] uppercase tracking-widest">Ma'lumot mavjud emas</p>
             </div>
           ) : (
-            <div className="h-[300px] lg:h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] lg:h-[400px] w-full" style={{ minHeight: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                 <BarChart data={skills} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                   <defs>
                     <linearGradient id="barG1" x1="0" y1="0" x2="0" y2="1">

@@ -200,12 +200,12 @@ export const skillsVerificationAPI = {
 };
 
 export const savedJobsAPI = {
-    saveJob: (jobId, notes) => api.post('/user/saved-jobs', null, { params: { job_id: jobId, notes } }),
+    saveJob: (jobId, notes) => api.post('/user/saved-jobs', { job_id: jobId, notes }),
     getSavedJobs: () => api.get('/user/saved-jobs'),
     unsaveJob: (jobId) => api.delete(`/user/saved-jobs/${jobId}`),
     checkSaved: (jobId) => api.get(`/user/saved-jobs/check/${jobId}`),
     getRecommendations: (limit) => api.get('/user/recommendations', { params: { limit } }),
-    followCompany: (companyName) => api.post('/user/follow-company', null, { params: { company_name: companyName } }),
+    followCompany: (companyName) => api.post('/user/follow-company', { company_name: companyName }),
     getFollowedCompanies: () => api.get('/user/followed-companies'),
     unfollowCompany: (companyName) => api.delete(`/user/follow-company/${companyName}`),
     checkFollowing: (companyName) => api.get(`/user/followed-companies/check/${companyName}`),

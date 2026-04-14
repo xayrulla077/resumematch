@@ -18,6 +18,10 @@ class SavedJobCreate(BaseModel):
     notes: Optional[str] = None
 
 
+class CompanyFollowCreate(BaseModel):
+    company_name: str
+
+
 class SavedJobResponse(BaseModel):
     id: int
     job_id: int
@@ -151,11 +155,12 @@ async def check_if_saved(
 
 @router.post("/follow-company")
 async def follow_company(
-    company_name: str,
+    data: CompanyFollowCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
     """Kompaniyani kuzatish"""
+    company_name = data.company_name
     # Check if already following
     existing = (
         db.query(models.CompanyFollow)
