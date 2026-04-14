@@ -33,6 +33,7 @@ import SavedJobs from './pages/SavedJobs';
 import NotificationsCenter from './pages/NotificationsCenter';
 import Companies from './pages/Companies';
 import { useState } from 'react';
+import BottomNav from './components/BottomNav';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -76,12 +77,12 @@ const AppLayout = () => {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-72 min-h-screen transition-all duration-300">
+      <div className="flex-1 lg:ml-72 min-h-screen transition-all duration-300 flex flex-col">
         {/* Mobile Top Bar */}
         <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-main)] sticky top-0 z-30">
           <div
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => window.location.href = '/'}
           >
             <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black italic text-sm shadow-lg shadow-indigo-500/20">
               RM
@@ -90,7 +91,7 @@ const AppLayout = () => {
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2.5 bg-[var(--bg-surface)] hover:bg-white/10 border border-[var(--border-main)] rounded-xl transition-all"
+            className="p-2.5 bg-[var(--bg-surface)] border border-[var(--border-main)] rounded-xl transition-all"
           >
             <div className="w-5 h-5 flex flex-col justify-center gap-1.5">
               <span className={`block h-0.5 bg-[var(--text-main)] rounded-full transition-all duration-300 ${sidebarOpen ? 'rotate-45 translate-y-2' : ''}`} />
@@ -100,11 +101,17 @@ const AppLayout = () => {
           </button>
         </div>
 
-        <Outlet />
+        <div className="flex-1 pb-24 lg:pb-0">
+          <Outlet />
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <BottomNav setSidebarOpen={setSidebarOpen} />
       </div>
     </div>
   );
 };
+
 
 function App() {
   return (

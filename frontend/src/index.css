@@ -84,3 +84,13 @@ input, textarea, select {
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

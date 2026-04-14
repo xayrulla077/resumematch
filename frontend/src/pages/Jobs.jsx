@@ -421,19 +421,19 @@ const Jobs = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
-            <h1 className="text-4xl lg:text-5xl font-black text-[var(--text-main)] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-main)] tracking-tight">
               Ish <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Vakansiyalari</span>
             </h1>
-            <p className="text-[var(--text-muted)] font-bold uppercase tracking-[0.2em] text-[10px] pl-1 border-l-2 border-indigo-500/50">
+            <p className="text-[var(--text-muted)] font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[10px] pl-1 border-l-2 border-indigo-500/50">
               Sizga mos keladigan eng yaxshi ishlarni toping
             </p>
           </div>
           {(user?.role === 'admin' || user?.role === 'employer') && (
             <button
               onClick={handleAddJob}
-              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-indigo-600/25 transition-all active:scale-95 group flex items-center gap-3"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-2xl shadow-indigo-600/25 transition-all active:scale-95 group flex items-center justify-center sm:justify-start gap-3"
             >
-              <Plus className="group-hover:rotate-90 transition-transform duration-500" size={20} />
+              <Plus className="group-hover:rotate-90 transition-transform duration-500" size={18} />
               {t('addNewJob') || 'Yangi Vakansiya'}
             </button>
           )}
@@ -441,26 +441,26 @@ const Jobs = () => {
 
         {/* Tabs for candidates */}
         {user?.role === 'candidate' && (
-          <div className="flex gap-4">
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
             <button
               onClick={() => { setActiveTab('all'); setCurrentPage(1); }}
-              className={`px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider transition-all ${
+              className={`flex-shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-black text-[11px] sm:text-sm uppercase tracking-wider transition-all ${
                 activeTab === 'all' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)] border border-[var(--border-main)]'
               }`}
             >
               Barcha vakansiyalar
             </button>
             <button
               onClick={() => { setActiveTab('recommended'); setCurrentPage(1); }}
-              className={`px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider transition-all flex items-center gap-2 ${
+              className={`flex-shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-black text-[11px] sm:text-sm uppercase tracking-wider transition-all flex items-center gap-2 ${
                 activeTab === 'recommended' 
-                  ? 'bg-purple-600 text-white' 
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' 
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-card)] border border-[var(--border-main)]'
               }`}
             >
-              <TrendingUp size={18} />
+              <TrendingUp size={16} className="sm:size-[18px]" />
               Mening uchun tavsiyalar
             </button>
           </div>
@@ -510,16 +510,16 @@ const Jobs = () => {
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="p-4 lg:p-6 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl space-y-5 backdrop-blur-3xl">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="p-4 sm:p-6 rounded-3xl sm:rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl space-y-4 sm:space-y-5 backdrop-blur-3xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
             <div className="lg:col-span-5 relative group">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-500 transition-colors" />
               <input
                 type="text"
-                placeholder="Vakansiya qidirish (Sarlavha, Kompaniya...)"
+                placeholder="Vakansiya qidirish..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-[1.25rem] py-4 pl-12 pr-6 text-[var(--text-main)] placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none font-bold text-sm"
+                className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl sm:rounded-[1.25rem] py-3.5 sm:py-4 pl-12 pr-6 text-[var(--text-main)] placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none font-bold text-sm"
               />
             </div>
             <div className="lg:col-span-4 relative group">
@@ -529,16 +529,16 @@ const Jobs = () => {
                 placeholder="Joylashuv..."
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-[1.25rem] py-4 pl-12 pr-6 text-[var(--text-main)] placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none font-bold text-sm"
+                className="w-full bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl sm:rounded-[1.25rem] py-3.5 sm:py-4 pl-12 pr-6 text-[var(--text-main)] placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none font-bold text-sm"
               />
             </div>
             <div className="lg:col-span-3">
-              <div className="flex bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-[1.25rem] p-1.5 h-full">
+              <div className="flex bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-xl sm:rounded-[1.25rem] p-1 h-full">
                 {['all', 'fullTime', 'remote'].map(type => (
                   <button
                     key={type}
                     onClick={() => setFilterType(type)}
-                    className={`flex-1 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filterType === type
+                    className={`flex-1 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all ${filterType === type
                       ? 'bg-indigo-600 text-white shadow-lg'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
                   >

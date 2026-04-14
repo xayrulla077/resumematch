@@ -253,13 +253,13 @@ const Dashboard = () => {
           style={staggerStyle(0)}
         >
           <div className="space-y-2">
-            <h1 className="text-4xl lg:text-5xl font-black text-[var(--text-main)] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-main)] tracking-tight">
               Xush kelibsiz!{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">
                 👋
               </span>
             </h1>
-            <p className="text-[var(--text-muted)] font-bold uppercase tracking-[0.2em] text-[10px] pl-1 border-l-2 border-indigo-500/50">
+            <p className="text-[var(--text-muted)] font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[10px] pl-1 border-l-2 border-indigo-500/50">
               Platformaning bugungi holati va asosiy ko'rsatkichlar
             </p>
           </div>
@@ -272,9 +272,9 @@ const Dashboard = () => {
             </div>
             <button
               onClick={() => navigate('/jobs')}
-              className="flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-indigo-500/25 transition-all active:scale-95 group"
+              className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-2xl shadow-indigo-500/25 transition-all active:scale-95 group"
             >
-              <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
+              <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-500" />
               <span>Yangi E'lon</span>
             </button>
           </div>
@@ -335,9 +335,9 @@ const Dashboard = () => {
           style={staggerStyle(4)}
         >
           {/* Analytics Chart */}
-          <div className="lg:col-span-2 p-8 lg:p-12 rounded-[3rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl overflow-hidden relative group">
+          <div className="lg:col-span-2 p-6 sm:p-8 lg:p-12 rounded-3xl sm:rounded-[3rem] bg-[var(--bg-surface)] border border-[var(--border-main)] shadow-2xl overflow-hidden relative group">
             <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none group-hover:rotate-12 transition-transform duration-1000">
-              <TrendingUp size={200} />
+              <TrendingUp size={160} />
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
