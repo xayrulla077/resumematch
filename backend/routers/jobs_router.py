@@ -7,6 +7,10 @@ from api.auth import get_current_active_user
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
+from sqlalchemy import or_
+import json
+from utils.activity_logger import log_activity
+from routers.notifications import create_notification
 
 router = APIRouter()
 
@@ -26,8 +30,6 @@ class PaginatedRecommendedJobsResponse(BaseModel):
     items: List[RecommendedJobResponse]
     metadata: schemas.PaginationMetadata
 
-@router.post("/", response_model=schemas.JobResponse)
-from utils.activity_logger import log_activity
 
 
 @router.post("/", response_model=schemas.JobResponse)
@@ -89,8 +91,6 @@ async def create_job(
 
                     # If 50%+ skills match, send notification
                     if len(matched_skills) >= len(job_skills) * 0.5:
-                        from routers.notifications import create_notification
-
                         create_notification(
                             db,
                             user_id=candidate.id,
@@ -316,7 +316,6 @@ async def get_recommended_jobs(
     for resume in user_resumes:
         if resume.skills:
             # skills string (comma separated) yoki JSON array bo'lishi mumkin
-            import json
             try:
                 # Agar JSON bo'lsa
                 skills_list = json.loads(resume.skills)
@@ -356,7 +355,6 @@ async def get_recommended_jobs(
         job_skills = set()
         if job.required_skills:
             # Xuddi resume skills kabi split qilamiz
-            import json
             try:
                 sk_list = json.loads(job.required_skills)
                 if isinstance(sk_list, list):
