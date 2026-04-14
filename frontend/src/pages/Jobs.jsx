@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { jobsAPI, resumesAPI, applicationsAPI, careerAPI } from '../services/api';
+import { jobsAPI, resumesAPI, applicationsAPI, careerAPI, savedJobsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -67,6 +67,7 @@ const Jobs = () => {
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [skillGap, setSkillGap] = useState(null);
+  const [savedJobIds, setSavedJobIds] = useState([]);
 
   // Pagination & Filtering
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,6 +150,17 @@ const Jobs = () => {
     }
   };
 
+  const loadSavedJobs = async () => {
+    if (user?.role !== 'candidate') return;
+    try {
+      const response = await savedJobsAPI.getSavedJobs();
+      setSavedJobIds(response.data.map(item => item.job.id));
+    } catch (error) {
+      console.error('Saved jobs load error:', error);
+    }
+  };
+
+
   const loadStats = async () => {
     try {
       setStatsLoading(true);
@@ -208,7 +220,31 @@ const Jobs = () => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
+  useEffect(() => {
+    loadSavedJobs();
+  }, [user]);
+
   // ── Actions ─────────────────────────────────────────────────────────────────
+
+  const handleToggleSave = async (jobId) => {
+    if (user?.role !== 'candidate') return;
+
+    const isCurrentlySaved = savedJobIds.includes(jobId);
+    
+    try {
+      if (isCurrentlySaved) {
+        await savedJobsAPI.unsaveJob(jobId);
+        setSavedJobIds(prev => prev.filter(id => id !== jobId));
+        toast.success("Ish sevimlilardan olib tashlandi");
+      } else {
+        await savedJobsAPI.saveJob(jobId);
+        setSavedJobIds(prev => [...prev, jobId]);
+        toast.success("Ish sevimlilarga saqlandi! ❤️");
+      }
+    } catch (error) {
+      toast.error("Xatolik yuz berdi");
+    }
+  };
 
   const handleGenerateCoverLetter = async () => {
     if (!selectedResume) {
@@ -563,6 +599,8 @@ const Jobs = () => {
                   onApply={handleApply}
                   onEdit={handleEditJob}
                   onDelete={handleDeleteConfirm}
+                  onSave={handleToggleSave}
+                  isSaved={savedJobIds.includes(job.id)}
                   t={t}
                 />
               ))}

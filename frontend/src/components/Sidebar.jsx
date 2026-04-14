@@ -110,6 +110,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { id: 'dashboard', path: '/', icon: LayoutDashboard, label: t('dashboard') },
     { id: 'admin-panel', path: '/admin', icon: Users, label: 'Boshqaruv paneli' },
     { id: 'jobs', path: '/jobs', icon: Briefcase, label: t('jobs') },
+    { id: 'companies', path: '/companies', icon: Building2, label: 'Kompaniyalar' },
     { id: 'applicants', path: '/admin/applicants', icon: Users, label: t('applicants'), hasBadge: true },
     { id: 'resumes', path: '/resumes', icon: FileText, label: t('resumes') },
     { id: 'analytics', path: '/analytics', icon: BarChart3, label: t('analytics') },
@@ -120,6 +121,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const employerMenuItems = [
     { id: 'my-jobs', path: '/my-jobs', icon: Briefcase, label: t('myJobs') },
     { id: 'jobs', path: '/jobs', icon: Search, label: t('findJobs') },
+    { id: 'companies', path: '/companies', icon: Building2, label: 'Kompaniyalar' },
     { id: 'best-candidates', path: '/best-candidates', icon: Award, label: 'Eng yaxshi nomzodlar' },
     { id: 'company-profile', path: '/company-profile', icon: Building2, label: 'Company Profile' },
     { id: 'company-reviews', path: '/company-reviews', icon: Star, label: 'Company Reviews' },
@@ -129,6 +131,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const candidateMenuItems = [
     { id: 'jobs', path: '/jobs', icon: Briefcase, label: t('jobs') },
+    { id: 'companies', path: '/companies', icon: Building2, label: 'Kompaniyalar' },
     { id: 'saved-jobs', path: '/saved-jobs', icon: Bookmark, label: 'Saved Jobs' },
     { id: 'applications', path: '/my-applications', icon: FileText, label: t('myApplications') },
     { id: 'interview-calendar', path: '/interview-calendar', icon: Calendar, label: 'Interviews' },
@@ -180,7 +183,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <>
-      {/* Sidebar Panel */}
       <div
         className={`
           w-72 bg-[var(--bg-main)]/95 backdrop-blur-3xl min-h-screen flex flex-col
@@ -190,11 +192,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           lg:translate-x-0
         `}
       >
-        {/* Decorative Circles */}
         <div className="absolute top-[-100px] left-[-100px] w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
         <div className="absolute bottom-[-50px] right-[-50px] w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Logo Section */}
         <div className="p-8 relative flex items-center justify-between">
           <div
             className="flex items-center gap-4 group cursor-pointer"
@@ -211,7 +211,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </div>
           </div>
 
-          {/* Mobile Close Button */}
           <button
             onClick={() => setSidebarOpen && setSidebarOpen(false)}
             className="lg:hidden p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-slate-400 hover:text-white"
@@ -220,7 +219,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </button>
         </div>
 
-        {/* Notifications Bar */}
         <div className="px-6 mb-6">
           <div className="relative">
             <button
@@ -241,7 +239,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </div>
             </button>
 
-            {/* Notifications Dropdown */}
             {showNotifications && (
               <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] rounded-[2rem] shadow-2xl z-[70] overflow-hidden animate-in zoom-in-95 slide-in-from-top-4 duration-300">
                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -282,7 +279,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
         </div>
 
-        {/* Main Navigation */}
         <nav className="flex-1 px-6 space-y-1 mt-2 overflow-y-auto no-scrollbar">
           <div className="px-4 mb-4">
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('menu')}</span>
@@ -309,7 +305,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   }
                 `}
               >
-                {/* Active left border indicator */}
                 {isActive && (
                   <div className="absolute left-0 w-1.5 h-6 bg-white rounded-r-full" />
                 )}
@@ -328,7 +323,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   {item.label}
                 </span>
 
-                {/* Notification badge */}
                 {item.hasBadge && notificationCount > 0 && !isActive && (
                   <div className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-lg shadow-rose-500/20 min-w-[22px] text-center">
                     {notificationCount}
@@ -338,7 +332,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             );
           })}
 
-          {/* Account Section */}
           <div className="px-4 mb-4">
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('account')}</span>
           </div>
@@ -371,9 +364,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </button>
         </nav>
 
-        {/* Footer — User Profile + Actions */}
         <div className="p-6 bg-white/[0.02] border-t border-white/5 relative">
-          {/* User Card */}
           <div
             className="flex items-center gap-4 mb-5 p-3 rounded-2xl group hover:bg-white/5 transition-all duration-300 cursor-pointer"
             onClick={() => handleNavigate('/profile')}
@@ -396,9 +387,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="grid grid-cols-3 gap-2">
-            {/* Language Picker */}
             <button
               onClick={() => setShowLangDropdown(!showLangDropdown)}
               className="flex flex-col items-center justify-center py-2.5 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl text-slate-300 transition-all border border-[var(--border-main)]"
@@ -407,7 +396,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <span className="text-[8px] font-black uppercase tracking-widest">{currentLang?.name}</span>
             </button>
 
-            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className="flex flex-col items-center justify-center py-2.5 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl text-slate-300 transition-all border border-[var(--border-main)]"
@@ -418,7 +406,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </span>
             </button>
 
-            {/* Logout */}
             <button
               onClick={handleLogout}
               className="flex flex-col items-center justify-center py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/20 group"
@@ -428,7 +415,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
           </div>
 
-          {/* Language Dropdown */}
           {showLangDropdown && (
             <div className="absolute bottom-[calc(100%-4px)] left-6 right-6 mb-1 p-2 bg-[var(--bg-surface)] backdrop-blur-3xl rounded-[1.5rem] shadow-2xl border border-[var(--border-main)] animate-in zoom-in-95 slide-in-from-bottom-3 duration-200 z-[60]">
               {languages.map((lang) => (

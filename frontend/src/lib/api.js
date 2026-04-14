@@ -211,4 +211,9 @@ export const savedJobsAPI = {
     checkFollowing: (companyName) => api.get(`/user/followed-companies/check/${companyName}`),
 };
 
+export const companiesAPI = {
+    getAll: (params) => api.get('/companies/', { params }),
+    getProfile: (id) => api.get(`/company/${id}`),
+};
+
 export default api;

@@ -1,4 +1,4 @@
-import { Briefcase, Building2, MapPin, DollarSign, Users, Edit, Trash2, ChevronRight } from 'lucide-react';
+import { Briefcase, Building2, MapPin, DollarSign, Users, Edit, Trash2, ChevronRight, Heart } from 'lucide-react';
 
 const JobCard = ({
   job,
@@ -10,6 +10,8 @@ const JobCard = ({
   onEdit,
   onDelete,
   onApply,
+  onSave,
+  isSaved,
   t
 }) => {
   return (
@@ -21,6 +23,16 @@ const JobCard = ({
         <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-600/20 text-indigo-500 flex items-center justify-center transition-all group-hover:bg-indigo-600 group-hover:text-white shadow-lg">
           <Briefcase size={24} />
         </div>
+        
+        {user?.role === 'candidate' && (
+           <button 
+             onClick={(e) => { e.stopPropagation(); onSave(job.id); }} 
+             className={`p-3 rounded-xl transition-all border border-white/5 shadow-xl ${isSaved ? 'bg-rose-500/20 text-rose-500 border-rose-500/30' : 'bg-white/5 text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10'}`}
+           >
+             <Heart size={20} fill={isSaved ? "currentColor" : "none"} />
+           </button>
+        )}
+
         {(user?.role === 'admin' || user?.role === 'employer') && (
           <div className="flex gap-2">
             <button onClick={(e) => { e.stopPropagation(); onEdit(job); }} className="p-3 bg-white/5 hover:bg-indigo-600 text-[var(--text-muted)] hover:text-white rounded-xl transition-all border border-white/5 shadow-xl font-bold flex items-center gap-2 text-[10px] uppercase">

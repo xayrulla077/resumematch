@@ -31,6 +31,7 @@ import VideoResume from './pages/VideoResume';
 import CompanyReviews from './pages/CompanyReviews';
 import SavedJobs from './pages/SavedJobs';
 import NotificationsCenter from './pages/NotificationsCenter';
+import Companies from './pages/Companies';
 import { useState } from 'react';
 
 const ProtectedRoute = ({ children }) => {
@@ -161,6 +162,7 @@ function App() {
                 <Route path="/resumes" element={<Resumes />} />
                 <Route path="/resume-builder" element={<ResumeBuilder />} />
                 <Route path="/jobs" element={<Jobs />} />
+                <Route path="/companies" element={<Companies />} />
                 <Route path="/my-jobs" element={<MyJobs />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/activities" element={<Activities />} />

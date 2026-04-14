@@ -178,9 +178,7 @@ async def list_companies(
     db: Session = Depends(get_db),
 ):
     """Kompaniyalar ro'yxati"""
-    query = db.query(models.CompanyProfile).filter(
-        models.CompanyProfile.is_verified == True
-    )
+    query = db.query(models.CompanyProfile)
 
     if industry:
         query = query.filter(models.CompanyProfile.industry == industry)
