@@ -364,3 +364,30 @@ async def upload_avatar(
     db.commit()
 
     return {"message": "Profil rasmi yangilandi", "url": current_user.profile_image}
+
+
+@router.get("/init-admin")
+async def init_admin(secret: str, db: Session = Depends(get_db)):
+    """Vaqtincha admin yaratish uchun endpoint (ishlatib bo'lgach o'chiriladi)"""
+    if secret != "Xayrullo2026":
+        raise HTTPException(status_code=403, detail="Noto'g'ri maxfiy kalit")
+    
+    username = "Xayrullo"
+    user = db.query(User).filter(User.username == username).first()
+    
+    if user:
+        user.role = "admin"
+        user.hashed_password = get_password_hash("Xayrullo2003")
+    else:
+        user = User(
+            username=username,
+            email="xayrulla077@gmail.com",
+            hashed_password=get_password_hash("Xayrullo2003"),
+            role="admin",
+            full_name="Xayrullo",
+            is_active=True
+        )
+        db.add(user)
+    
+    db.commit()
+    return {"message": f"Admin {username} muvaffaqiyatli yaratildi/yangilandi!"}
