@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { resumesAPI, statsAPI, analyticsAPI } from '../services/api';
 import { toast } from 'sonner';
 import {
@@ -112,6 +113,7 @@ const TableRowSkeleton = () => (
 
 const Dashboard = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({ resumes: 0, jobs: 0, applicants: 0 });
@@ -270,6 +272,7 @@ const Dashboard = () => {
                 {new Date().toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' })}
               </span>
             </div>
+            {(user?.role === 'admin' || user?.role === 'employer') && (
             <button
               onClick={() => navigate('/jobs')}
               className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-2xl shadow-indigo-500/25 transition-all active:scale-95 group"
@@ -277,6 +280,7 @@ const Dashboard = () => {
               <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-500" />
               <span>Yangi E'lon</span>
             </button>
+            )}
           </div>
         </div>
 
