@@ -265,7 +265,7 @@ const SavedJobs = () => {
                     </div>
                     {rec.job?.required_skills && (
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {rec.job?.required_skills.split(',').slice(0, 5).map((skill, i) => (
+                        {(Array.isArray(rec.job?.required_skills) ? rec.job?.required_skills : (rec.job?.required_skills || "").split(',')).slice(0, 5).map((skill, i) => (
                           <span key={i} className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold">
                             {skill.trim()}
                           </span>

@@ -176,12 +176,15 @@ const CandidateProfileModal = ({ applicationId, candidateName, onClose }) => {
                 <Award size={16} /> Sertifikatlar va malakoviy darajalar
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {resume.certifications.split(',').map((cert, idx) => (
+                {(Array.isArray(resume.certifications) 
+                  ? resume.certifications 
+                  : (resume.certifications || "").split(',')
+                ).map((cert, idx) => (
                   <div key={idx} className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl p-3">
                     <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
                       <Award size={18} className="text-amber-500" />
                     </div>
-                    <p className="text-sm text-[var(--text-main)] font-bold">{cert.trim()}</p>
+                    <p className="text-sm text-[var(--text-main)] font-bold">{String(cert).trim()}</p>
                   </div>
                 ))}
               </div>
@@ -229,10 +232,13 @@ const CandidateProfileModal = ({ applicationId, candidateName, onClose }) => {
                 <Trophy size={16} /> Yutuqlar va mukofotlar
               </h3>
               <div className="space-y-2">
-                {resume.achievements.split(',').map((achievement, idx) => (
+                {(Array.isArray(resume.achievements) 
+                  ? resume.achievements 
+                  : (resume.achievements || "").split(',')
+                ).map((achievement, idx) => (
                   <div key={idx} className="flex items-center gap-3 bg-purple-500/5 border border-purple-500/20 rounded-xl p-3">
                     <Trophy size={16} className="text-purple-500" />
-                    <p className="text-sm text-[var(--text-main)]">{achievement.trim()}</p>
+                    <p className="text-sm text-[var(--text-main)]">{String(achievement).trim()}</p>
                   </div>
                 ))}
               </div>

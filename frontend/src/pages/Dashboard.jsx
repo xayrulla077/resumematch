@@ -700,7 +700,7 @@ const Dashboard = () => {
               <div className="space-y-4">
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-l-4 border-indigo-600 pl-3">Skill Tahlili</h4>
                 <div className="flex flex-wrap gap-2">
-                  {(selectedResume.skills || "").split(', ').map(skill => (
+                  {(Array.isArray(selectedResume.skills) ? selectedResume.skills : (selectedResume.skills || "").split(', ')).map(skill => (
                     <span key={skill} className="px-4 py-2.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 rounded-2xl text-[10px] font-black uppercase tracking-widest">
                       {skill}
                     </span>

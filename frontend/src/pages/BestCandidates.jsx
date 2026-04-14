@@ -344,7 +344,7 @@ const BestCandidates = () => {
                                         <div className="p-4 bg-[var(--bg-card)] rounded-2xl">
                                             <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest mb-2">Ko'nikmalar</p>
                                             <div className="flex flex-wrap gap-2">
-                                                {candidateDetails.skills.split(',').map((skill, i) => (
+                                                {(Array.isArray(candidateDetails.skills) ? candidateDetails.skills : candidateDetails.skills.split(',')).map((skill, i) => (
                                                     <span key={i} className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold">
                                                         {skill.trim()}
                                                     </span>
