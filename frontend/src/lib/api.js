@@ -213,7 +213,7 @@ export const savedJobsAPI = {
 
 export const companiesAPI = {
     getAll: (params) => api.get('/companies/', { params }),
-    getProfile: (id) => api.get(`/company/${id}`),
+    getProfile: (id) => api.get(`/companies/company/${id}`),
 };
 
 export default api;

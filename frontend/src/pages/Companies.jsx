@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { companiesAPI, savedJobsAPI } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
@@ -214,12 +215,12 @@ const Companies = () => {
                         {followingCompanies.includes(company.company_name) ? 'Kuzatilyapti' : 'Kuzatish'}
                       </button>
                     )}
-                    <a 
-                      href={`/company/${company.id}`}
+                    <Link 
+                      to={`/company/${company.id}`}
                       className="w-full py-2.5 sm:py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all inline-block"
                     >
                       Profilni ko'rish
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}
