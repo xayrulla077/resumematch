@@ -82,6 +82,16 @@ async def schedule_interview(
     db.commit()
     db.refresh(new_schedule)
 
+    # Send Notification for Interview Schedule
+    from routers.notifications import create_notification
+    create_notification(
+        db,
+        user_id=application.user_id,
+        title="Intervyuga taklif!",
+        message=f"Sizning '{job.title}' uchun topshirgan arizangiz ma'qullandi va intervyu belgilandi. Intervyu calendar bo'limida sanani tekshiring.",
+        n_type="status_update",
+    )
+
     return new_schedule
 
 

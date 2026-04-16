@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { jobsAPI, applicationsAPI, messagesAPI } from '../services/api';
+import { jobsAPI, applicationsAPI, messagesAPI, interviewAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import ChatModal from '../components/ChatModal';
@@ -91,8 +91,16 @@ const MyJobs = () => {
   const [showChat, setShowChat] = useState(false);
   const [chatApp, setChatApp] = useState(null);
   const [showCandidateProfile, setShowCandidateProfile] = useState(null);
+  
+  const [scheduleAppId, setScheduleAppId] = useState(null);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleDuration, setScheduleDuration] = useState(60);
 
   const handleUpdateStatus = async (applicationId, newStatus) => {
+    if (newStatus === 'interview') {
+      setScheduleAppId(applicationId);
+      return;
+    }
     setUpdatingStatus(applicationId);
     try {
       await applicationsAPI.updateStatus(applicationId, newStatus, '');
@@ -105,6 +113,32 @@ const MyJobs = () => {
       toast.error("Holatni yangilashda xatolik");
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!scheduleDate) {
+      toast.error("Iltimos, sanani tanlang!");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await interviewAPI.schedule({
+        application_id: scheduleAppId,
+        scheduled_at: new Date(scheduleDate).toISOString(),
+        duration_minutes: scheduleDuration,
+        notes: "Intervyuga tayyorgarlik ko'rib kiring."
+      });
+      toast.success("Intervyu belgilandi va xabar yuborildi!");
+      setScheduleAppId(null);
+      setScheduleDate('');
+      if (selectedJobForApplicants) {
+        viewApplicants(selectedJobForApplicants);
+      }
+    } catch (error) {
+      toast.error("Intervyu belgilashda xato: " + (error.response?.data?.detail || error.message));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -186,6 +220,7 @@ const MyJobs = () => {
         setShowJobModal(false);
         setShowDeleteConfirm(false);
         setShowApplicantsModal(false);
+        setScheduleAppId(null);
       }
     };
     window.addEventListener('keydown', handleEsc);
@@ -787,6 +822,57 @@ const MyJobs = () => {
           candidateName={showCandidateProfile.applicant_name}
           onClose={() => setShowCandidateProfile(null)}
         />
+      )}
+
+      {/* Schedule Interview Modal */}
+      {scheduleAppId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setScheduleAppId(null)} />
+          <div className="relative w-full max-w-md bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-main)] shadow-2xl p-8">
+            <h2 className="text-2xl font-black text-[var(--text-main)] mb-6">Intervyu kunini belgilash</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">
+                  Sana va vaqt
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl py-3 px-4 text-[var(--text-main)] font-bold text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">
+                  Davomiyligi (daqiqa)
+                </label>
+                <input
+                  type="number"
+                  value={scheduleDuration}
+                  onChange={(e) => setScheduleDuration(Number(e.target.value))}
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-2xl py-3 px-4 text-[var(--text-main)] font-bold text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => setScheduleAppId(null)}
+                className="flex-1 bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-main)] font-black py-3 rounded-2xl transition-all border border-[var(--border-main)]"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleScheduleInterview}
+                disabled={submitting}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-2xl transition-all disabled:opacity-50"
+              >
+                {submitting ? 'Saqlanmoqda...' : 'Belgilash'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
