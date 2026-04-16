@@ -295,18 +295,19 @@ async def update_application_status(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Ariza statusini o'zgartirish (faqat admin)"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Faqat adminlar o'zgartira oladi")
-
+    """Ariza statusini o'zgartirish (faqat admin va ish beruvchi)"""
     application = (
         db.query(models.Application)
+        .options(joinedload(models.Application.job))
         .filter(models.Application.id == application_id)
         .first()
     )
 
     if not application:
         raise HTTPException(status_code=404, detail="Ariza topilmadi")
+
+    if current_user.role != "admin" and application.job.creator_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Faqat ish beruvchi yoki adminlar o'zgartira oladi")
 
     application.status = status
     application.admin_notes = admin_notes
