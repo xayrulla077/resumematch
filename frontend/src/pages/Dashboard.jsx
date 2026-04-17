@@ -544,8 +544,8 @@ const Dashboard = () => {
                             />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-black text-[var(--text-main)] text-sm uppercase tracking-tight group-hover/row:text-indigo-500 transition-colors truncate">
-                              {resume.full_name || resume.file_name?.replace('.pdf', '')}
+                            <div className="font-black text-[var(--text-main)] text-sm capitalize tracking-tight group-hover/row:text-indigo-500 transition-colors truncate">
+                              {(resume.full_name || resume.file_name?.replace('.pdf', '') || '').toLowerCase()}
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -659,7 +659,7 @@ const Dashboard = () => {
                   {(selectedResume.full_name || selectedResume.file_name || '').charAt(0).toUpperCase() || '?'}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white uppercase tracking-tight">{selectedResume.full_name || "Nomzod"}</h2>
+                  <h2 className="text-2xl font-black text-white capitalize tracking-tight">{(selectedResume.full_name || "Nomzod").toLowerCase()}</h2>
                   <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mt-1 tracking-[0.2em]">{selectedResume.file_name || 'Noma\'lum'}</p>
                 </div>
               </div>
