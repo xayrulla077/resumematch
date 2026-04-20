@@ -186,7 +186,7 @@ async def get_my_jobs(
                 "requirements": job.requirements,
                 "creator_id": job.creator_id,
                 "is_active": job.is_active,
-                "posted_at": job.posted_at.isoformat() if job.posted_at else None,
+                "posted_at": job.posted_at,
                 "applications_count": app_count,
             }
         )
@@ -195,6 +195,124 @@ async def get_my_jobs(
 
     return {
         "items": jobs_with_count,
+        "metadata": {
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages,
+        },
+    }
+
+
+@router.get("/recommended")
+async def get_recommended_jobs(
+    page: int = 1,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    """Candidate uchun tavsiya etilgan ishlar - uning resume skills bo'yicha"""
+    if current_user.role == "employer" or current_user.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Bu funksiya faqat candidatelar uchun"
+        )
+
+    # Validate page and limit
+    try:
+        page = max(1, int(page))
+        limit = max(1, min(100, int(limit)))
+    except (ValueError, TypeError):
+        page = 1
+        limit = 10
+
+    # Foydalanuvchining resume(s)ini olish
+    user_resumes = (
+        db.query(models.Resume).filter(models.Resume.user_id == current_user.id).all()
+    )
+
+    if not user_resumes:
+        return {
+            "items": [],
+            "metadata": {"total": 0, "page": page, "limit": limit, "total_pages": 0}
+        }
+
+    # Barcha resume skilllarini yig'ish
+    all_skills = set()
+    for resume in user_resumes:
+        if resume.skills:
+            try:
+                skills_list = json.loads(resume.skills)
+                if isinstance(skills_list, list):
+                    for s in skills_list:
+                        all_skills.add(str(s).strip().lower())
+                else:
+                    for s in str(resume.skills).split(","):
+                        all_skills.add(s.strip().lower())
+            except:
+                for s in str(resume.skills).split(","):
+                    if s.strip():
+                        all_skills.add(s.strip().lower())
+
+    skip = (page - 1) * limit
+
+    # Faqat active ishlar
+    query = db.query(models.Job).filter(models.Job.is_active == True)
+
+    # Already applied jobsni chiqarib tashlash
+    applied_job_ids = [
+        app.job_id
+        for app in db.query(models.Application)
+        .filter(models.Application.user_id == current_user.id)
+        .all()
+    ]
+    if applied_job_ids:
+        query = query.filter(~models.Job.id.in_(applied_job_ids))
+
+    total = query.count()
+    jobs = query.order_by(models.Job.posted_at.desc()).offset(skip).limit(limit).all()
+
+    # Har bir job uchun match score hisoblash
+    results = []
+    for job in jobs:
+        job_skills = set()
+        if job.required_skills:
+            try:
+                sk_list = json.loads(job.required_skills)
+                if isinstance(sk_list, list):
+                    job_skills = set(str(s).strip().lower() for s in sk_list if s)
+                else:
+                    job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
+            except:
+                job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
+
+        match_score = 0.0
+        if job_skills and all_skills:
+            matched = all_skills.intersection(job_skills)
+            match_score = (len(matched) / len(job_skills)) * 100
+
+        results.append(
+            {
+                "id": job.id,
+                "title": job.title,
+                "company": job.company,
+                "location": job.location,
+                "salary": job.salary,
+                "employment_type": job.employment_type,
+                "description": job.description,
+                "requirements": job.requirements,
+                "posted_at": job.posted_at,
+                "match_score": round(match_score, 1),
+            }
+        )
+
+    # Match score bo'yicha saralash
+    results.sort(key=lambda x: x.get("match_score", 0), reverse=True)
+
+    total_pages = (total + limit - 1) // limit if limit > 0 else 0
+
+    return {
+        "items": results,
         "metadata": {
             "total": total,
             "page": page,
@@ -276,125 +394,3 @@ async def update_job(
     )
 
     return job
-
-
-@router.get("/recommended")
-async def get_recommended_jobs(
-    page: int = 1,
-    limit: int = 10,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user),
-):
-    """Candidate uchun tavsiya etilgan ishlar - uning resume skills bo'yicha"""
-    if current_user.role == "employer" or current_user.role == "admin":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Bu funksiya faqat candidatelar uchun"
-        )
-
-    # Validate page and limit
-    try:
-        page = max(1, int(page))
-        limit = max(1, min(100, int(limit)))
-    except (ValueError, TypeError):
-        page = 1
-        limit = 10
-
-    # Foydalanuvchining resume(s)ini olish
-    user_resumes = (
-        db.query(models.Resume).filter(models.Resume.user_id == current_user.id).all()
-    )
-
-    if not user_resumes:
-        return {
-            "items": [],
-            "metadata": {"total": 0, "page": page, "limit": limit, "total_pages": 0}
-        }
-
-    # Barcha resume skilllarini yig'ish
-    all_skills = set()
-    for resume in user_resumes:
-        if resume.skills:
-            # skills string (comma separated) yoki JSON array bo'lishi mumkin
-            try:
-                # Agar JSON bo'lsa
-                skills_list = json.loads(resume.skills)
-                if isinstance(skills_list, list):
-                    for s in skills_list:
-                        all_skills.add(str(s).strip().lower())
-                else:
-                    for s in str(resume.skills).split(","):
-                        all_skills.add(s.strip().lower())
-            except:
-                # Agar oddiy string bo'lsa
-                for s in str(resume.skills).split(","):
-                    if s.strip():
-                        all_skills.add(s.strip().lower())
-
-    skip = (page - 1) * limit
-
-    # Faqat active ishlar
-    query = db.query(models.Job).filter(models.Job.is_active == True)
-
-    # Already applied jobsni chiqarib tashlash
-    applied_job_ids = [
-        app.job_id
-        for app in db.query(models.Application)
-        .filter(models.Application.user_id == current_user.id)
-        .all()
-    ]
-    if applied_job_ids:
-        query = query.filter(~models.Job.id.in_(applied_job_ids))
-
-    total = query.count()
-    jobs = query.order_by(models.Job.posted_at.desc()).offset(skip).limit(limit).all()
-
-    # Har bir job uchun match score hisoblash
-    results = []
-    for job in jobs:
-        job_skills = set()
-        if job.required_skills:
-            # Xuddi resume skills kabi split qilamiz
-            try:
-                sk_list = json.loads(job.required_skills)
-                if isinstance(sk_list, list):
-                    job_skills = set(str(s).strip().lower() for s in sk_list if s)
-                else:
-                    job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
-            except:
-                job_skills = set(s.strip().lower() for s in str(job.required_skills).split(",") if s.strip())
-
-        match_score = 0.0
-        if job_skills and all_skills:
-            matched = all_skills.intersection(job_skills)
-            match_score = (len(matched) / len(job_skills)) * 100
-
-        results.append(
-            {
-                "id": job.id,
-                "title": job.title,
-                "company": job.company,
-                "location": job.location,
-                "salary": job.salary,
-                "employment_type": job.employment_type,
-                "description": job.description,
-                "requirements": job.requirements,
-                "posted_at": job.posted_at,
-                "match_score": round(match_score, 1),
-            }
-        )
-
-    # Match score bo'yicha saralash
-    results.sort(key=lambda x: x.get("match_score", 0), reverse=True)
-
-    total_pages = (total + limit - 1) // limit if limit > 0 else 0
-
-    return {
-        "items": results,
-        "metadata": {
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "total_pages": total_pages,
-        },
-    }
