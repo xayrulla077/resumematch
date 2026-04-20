@@ -33,6 +33,8 @@ import SavedJobs from './pages/SavedJobs';
 import NotificationsCenter from './pages/NotificationsCenter';
 import Companies from './pages/Companies';
 import CompanyDetails from './pages/CompanyDetails';
+import ProfileCompletion from './pages/ProfileCompletion';
+import ApplicantTracking from './pages/ApplicantTracking';
 import { useState } from 'react';
 import BottomNav from './components/BottomNav';
 
@@ -192,6 +194,8 @@ function App() {
                 <Route path="/company-reviews" element={<CompanyReviews />} />
                 <Route path="/saved-jobs" element={<SavedJobs />} />
                 <Route path="/notifications" element={<NotificationsCenter />} />
+                <Route path="/profile-completion" element={<ProfileCompletion />} />
+                <Route path="/applicant-tracking" element={<ApplicantTracking />} />
               </Route>
 
               {/* Fallback */}

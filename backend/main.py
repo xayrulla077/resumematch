@@ -102,6 +102,9 @@ from routers import (
     skills_verification_router,
     job_alerts_router,
     saved_jobs_router,
+    profile_completion_router,
+    global_search_router,
+    applicant_tracking_router,
 )
 from api.database import engine, Base, get_db
 from api import models
@@ -182,7 +185,7 @@ CORS_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
     "https://frontend-production-c28ee.up.railway.app",
-    "https://resumematch-production-cb46.up.railway.app", # Ba'zan backend o'ziga o'zi so'rov yuborishi mumkin
+    "https://resumematch-production-cb46.up.railway.app",  # Ba'zan backend o'ziga o'zi so'rov yuborishi mumkin
 ]
 
 # Env dan kelgan originlarni qo'shish va tozalash
@@ -199,7 +202,9 @@ print(f"CORS origins configured: {CORS_ORIGINS}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_credentials=True if CORS_ORIGINS != ["*"] else False, # Credentials not allowed with "*"
+    allow_credentials=True
+    if CORS_ORIGINS != ["*"]
+    else False,  # Credentials not allowed with "*"
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
@@ -247,6 +252,9 @@ app.include_router(
 )
 app.include_router(job_alerts_router, prefix="/api/job-alerts", tags=["JobAlerts"])
 app.include_router(saved_jobs_router, prefix="/api/user", tags=["SavedJobs"])
+app.include_router(profile_completion_router, prefix="/api/user", tags=["Profile"])
+app.include_router(global_search_router, prefix="/api/search", tags=["Search"])
+app.include_router(applicant_tracking_router, prefix="/api/ats", tags=["ATS"])
 
 
 @app.get("/")

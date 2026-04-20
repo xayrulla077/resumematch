@@ -18,6 +18,13 @@ class CompanyProfileBase(BaseModel):
     website: Optional[str] = None
     location: Optional[str] = None
     founded_year: Optional[int] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    work_hours_start: Optional[str] = None
+    work_hours_end: Optional[str] = None
+    work_days: Optional[str] = None
+    gallery_images: Optional[str] = None  # JSON string
+    founders: Optional[str] = None  # JSON string
     linkedin: Optional[str] = None
     facebook: Optional[str] = None
     instagram: Optional[str] = None
@@ -72,6 +79,13 @@ async def create_company_profile(
         website=profile.website,
         location=profile.location,
         founded_year=profile.founded_year,
+        phone=profile.phone,
+        email=profile.email,
+        work_hours_start=profile.work_hours_start,
+        work_hours_end=profile.work_hours_end,
+        work_days=profile.work_days,
+        gallery_images=profile.gallery_images,
+        founders=profile.founders,
         linkedin=profile.linkedin,
         facebook=profile.facebook,
         instagram=profile.instagram,

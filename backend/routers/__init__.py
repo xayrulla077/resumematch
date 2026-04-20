@@ -22,3 +22,6 @@ from routers.resume_generator import router as resume_generator_router
 from routers.skills_verification import router as skills_verification_router
 from routers.job_alerts import router as job_alerts_router
 from routers.saved_jobs import router as saved_jobs_router
+from routers.profile_completion import router as profile_completion_router
+from routers.global_search import router as global_search_router
+from routers.applicant_tracking import router as applicant_tracking_router

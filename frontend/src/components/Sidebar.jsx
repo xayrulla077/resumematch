@@ -22,7 +22,8 @@ import {
   Calendar,
   Video,
   Star,
-  Bookmark
+  Bookmark,
+  Target
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -120,6 +121,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const employerMenuItems = [
     { id: 'my-jobs', path: '/my-jobs', icon: Briefcase, label: t('myJobs') },
+    { id: 'applicant-tracking', path: '/applicant-tracking', icon: Users, label: 'Applicant Tracking' },
     { id: 'jobs', path: '/jobs', icon: Search, label: t('findJobs') },
     { id: 'companies', path: '/companies', icon: Building2, label: 'Kompaniyalar' },
     { id: 'best-candidates', path: '/best-candidates', icon: Award, label: 'Eng yaxshi nomzodlar' },
@@ -130,6 +132,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   ];
 
   const candidateMenuItems = [
+    { id: 'profile-completion', path: '/profile-completion', icon: Target, label: 'Profile Completion' },
     { id: 'jobs', path: '/jobs', icon: Briefcase, label: t('jobs') },
     { id: 'companies', path: '/companies', icon: Building2, label: 'Kompaniyalar' },
     { id: 'saved-jobs', path: '/saved-jobs', icon: Bookmark, label: 'Saved Jobs' },

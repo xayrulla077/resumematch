@@ -338,8 +338,23 @@ class CompanyProfile(Base):
     location = Column(String)
     founded_year = Column(Integer)
 
+    # Contact info
+    phone = Column(String)
+    email = Column(String)
+
+    # Working hours
+    work_hours_start = Column(String)  # e.g. "09:00"
+    work_hours_end = Column(String)    # e.g. "18:00"
+    work_days = Column(String)         # e.g. "Dushanba - Juma"
+
     logo_url = Column(String)
     cover_image = Column(String)
+
+    # Gallery images — JSON array of URLs
+    gallery_images = Column(Text)  # JSON string
+
+    # Founders/Team — JSON array of {name, role, photo}
+    founders = Column(Text)  # JSON string
 
     # Social links
     linkedin = Column(String)
@@ -423,6 +438,7 @@ class SavedJob(Base):
     job = relationship("Job")
 
 
+
 class CompanyFollow(Base):
     """Companies that users follow"""
 
@@ -434,4 +450,27 @@ class CompanyFollow(Base):
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    user = relationship("User")
+
+
+class CompanyReview(Base):
+    """Reviews and ratings for companies"""
+
+    __tablename__ = "company_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_name = Column(String, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    rating = Column(Integer, nullable=False)
+    title = Column(String)
+    pros = Column(Text)
+    cons = Column(Text)
+    advice = Column(Text)
+    is_anonymous = Column(Boolean, default=True)
+    work_type = Column(String, default="full_time")  # full_time, part_time, contract, etc.
+
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Relationship
     user = relationship("User")
