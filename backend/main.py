@@ -114,38 +114,27 @@ from fastapi import Depends
 # Database tables yaratish
 Base.metadata.create_all(bind=engine)
 
-# Manual migration for existing tables (SQLite limitation fix)
+# Manual migration - works for both SQLite and PostgreSQL
 def patch_database():
+    from sqlalchemy import text, inspect
+    columns_to_add = ['location', 'linkedin', 'facebook', 'instagram']
     try:
-        import sqlite3
-        # Get DB path from connection string or assume default
-        db_path = "resume_matcher.db"
-        if os.path.exists(db_path):
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            
-            # Columns to check and add
-            columns = [
-                ('location', 'VARCHAR'),
-                ('linkedin', 'VARCHAR'),
-                ('facebook', 'VARCHAR'),
-                ('instagram', 'VARCHAR')
-            ]
-            
-            cursor.execute("PRAGMA table_info(users)")
-            existing = [col[1] for col in cursor.fetchall()]
-            
-            for col_name, col_type in columns:
-                if col_name not in existing:
-                    print(f"Migration: Adding {col_name} to users table")
-                    cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
-            
-            conn.commit()
-            conn.close()
+        with engine.connect() as conn:
+            inspector = inspect(engine)
+            existing_columns = [col['name'] for col in inspector.get_columns('users')]
+            for col_name in columns_to_add:
+                if col_name not in existing_columns:
+                    print(f"Migration: Adding column '{col_name}' to users table")
+                    conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} VARCHAR"))
+                    conn.commit()
+                    print(f"Migration: Column '{col_name}' added successfully")
+                else:
+                    print(f"Migration: Column '{col_name}' already exists, skipping")
+        print("Migration completed successfully")
     except Exception as e:
-        print(f"Migration error: {e}")
+        print(f"Migration error (non-critical): {e}")
 
-# Run patch before starting app
+# Run patch on startup
 patch_database()
 
 app = FastAPI(
