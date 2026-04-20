@@ -117,19 +117,39 @@ Base.metadata.create_all(bind=engine)
 # Manual migration - works for both SQLite and PostgreSQL
 def patch_database():
     from sqlalchemy import text, inspect
-    columns_to_add = ['location', 'linkedin', 'facebook', 'instagram']
     try:
         with engine.connect() as conn:
             inspector = inspect(engine)
-            existing_columns = [col['name'] for col in inspector.get_columns('users')]
-            for col_name in columns_to_add:
-                if col_name not in existing_columns:
-                    print(f"Migration: Adding column '{col_name}' to users table")
-                    conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} VARCHAR"))
+            
+            # Fix users table
+            user_cols = [col['name'] for col in inspector.get_columns('users')]
+            new_user_cols = ['location', 'linkedin', 'facebook', 'instagram']
+            for col in new_user_cols:
+                if col not in user_cols:
+                    print(f"Migration: Adding column '{col}' to users table")
+                    conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} VARCHAR"))
                     conn.commit()
-                    print(f"Migration: Column '{col_name}' added successfully")
-                else:
-                    print(f"Migration: Column '{col_name}' already exists, skipping")
+            
+            # Fix company_profiles table
+            if 'company_profiles' in inspector.get_table_names():
+                cp_cols = [col['name'] for col in inspector.get_columns('company_profiles')]
+                new_cp_cols = [
+                    ('work_hours_start', 'VARCHAR'),
+                    ('work_hours_end', 'VARCHAR'),
+                    ('work_days', 'VARCHAR'),
+                    ('gallery_images', 'TEXT'),
+                    ('founders', 'TEXT'),
+                    ('linkedin', 'VARCHAR'),
+                    ('facebook', 'VARCHAR'),
+                    ('instagram', 'VARCHAR'),
+                    ('cover_image', 'VARCHAR')
+                ]
+                for col_name, col_type in new_cp_cols:
+                    if col_name not in cp_cols:
+                        print(f"Migration: Adding column '{col_name}' to company_profiles table")
+                        conn.execute(text(f"ALTER TABLE company_profiles ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+                        
         print("Migration completed successfully")
     except Exception as e:
         print(f"Migration error (non-critical): {e}")
