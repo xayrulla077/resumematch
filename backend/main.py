@@ -187,6 +187,9 @@ CORS_ORIGINS = [
     "https://frontend-production-c28ee.up.railway.app",
     "https://resumematch-production-cb46.up.railway.app",
     "https://resumematch.uz",
+    "http://resumematch.uz",
+    "https://www.resumematch.uz",
+    "http://www.resumematch.uz",
 ]
 
 # Env dan kelgan originlarni qo'shish va tozalash
