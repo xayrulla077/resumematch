@@ -30,7 +30,7 @@ const GlobalSearch = () => {
         return;
       }
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/search/suggestions?q=${query}`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/search/suggestions?q=${query}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         setSuggestions(res.data.suggestions || []);
@@ -49,7 +49,7 @@ const GlobalSearch = () => {
     setLoading(true);
     setShowResults(true);
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/search/search?q=${query}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/search/search?q=${query}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       setResults(res.data);

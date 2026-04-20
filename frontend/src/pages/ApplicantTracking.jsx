@@ -35,7 +35,7 @@ const ApplicantTracking = () => {
 
   const loadPipeline = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/ats/pipeline', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/ats/pipeline`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       setPipeline(res.data.stages || []);
@@ -48,7 +48,7 @@ const ApplicantTracking = () => {
 
   const loadStats = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/ats/pipeline/stats', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/ats/pipeline/stats`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       setStats(res.data);
@@ -60,7 +60,7 @@ const ApplicantTracking = () => {
   const updateStatus = async (appId, newStatus) => {
     setUpdating(true);
     try {
-      await axios.put(`http://127.0.0.1:8000/api/ats/pipeline/${appId}/status`, 
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/ats/pipeline/${appId}/status`, 
         { status: newStatus },
         { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -79,7 +79,7 @@ const ApplicantTracking = () => {
     if (!noteText.trim()) return;
     setUpdating(true);
     try {
-      await axios.post(`http://127.0.0.1:8000/api/ats/pipeline/${appId}/notes?note=${encodeURIComponent(noteText)}`,
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/ats/pipeline/${appId}/notes?note=${encodeURIComponent(noteText)}`,
         {},
         { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
       );

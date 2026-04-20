@@ -52,10 +52,10 @@ const ProfileCompletion = () => {
   const loadProfileData = async () => {
     try {
       const [completionRes, wizardRes] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/user/profile-completion', {
+        fetch(`${import.meta.env.VITE_API_URL}/api/user/profile-completion`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         }),
-        fetch('http://127.0.0.1:8000/api/user/profile-wizard-steps', {
+        fetch(`${import.meta.env.VITE_API_URL}/api/user/profile-wizard-steps`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         })
       ]);

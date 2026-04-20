@@ -185,7 +185,8 @@ CORS_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
     "https://frontend-production-c28ee.up.railway.app",
-    "https://resumematch-production-cb46.up.railway.app",  # Ba'zan backend o'ziga o'zi so'rov yuborishi mumkin
+    "https://resumematch-production-cb46.up.railway.app",
+    "https://resumematch.uz",
 ]
 
 # Env dan kelgan originlarni qo'shish va tozalash
