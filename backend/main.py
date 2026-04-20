@@ -203,11 +203,11 @@ if env_origins:
 # Logging CORS origins to help debug
 print(f"CORS origins configured: {CORS_ORIGINS}")
 
-# CORS - xavfsiz universal ruxsat (credentials bilan)
+# CORS - maksimal muvofiqlik (Bearer token ishlatganimiz uchun credentials shart emas)
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="https?://.*",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],

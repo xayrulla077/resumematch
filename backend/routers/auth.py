@@ -312,6 +312,14 @@ async def update_me(
         current_user.phone = user_update.phone
     if user_update.bio is not None:
         current_user.bio = user_update.bio
+    if user_update.location is not None:
+        current_user.location = user_update.location
+    if user_update.linkedin is not None:
+        current_user.linkedin = user_update.linkedin
+    if user_update.facebook is not None:
+        current_user.facebook = user_update.facebook
+    if user_update.instagram is not None:
+        current_user.instagram = user_update.instagram
     if user_update.email:
         existing_email = (
             db.query(User)

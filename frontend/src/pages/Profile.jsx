@@ -116,7 +116,7 @@ const Profile = () => {
             <div className="max-w-4xl mx-auto relative z-10 space-y-10 animate-in fade-in duration-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tight">PROFIL <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">SOZLAMALARI</span> ⚙️</h1>
+                        <h1 className="text-4xl font-bold text-[var(--text-main)] tracking-tight">PROFIL <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">SOZLAMALARI</span> ⚙️</h1>
                         <p className="text-[var(--text-muted)] mt-2 font-bold uppercase tracking-widest text-xs">Shaxsiy ma'lumotlaringizni boshqaring va yangilang.</p>
                     </div>
                 </div>
@@ -130,7 +130,7 @@ const Profile = () => {
                             }`}>
                             {message.type === 'success' ? <CheckCircle size={24} /> : <X size={24} />}
                         </div>
-                        <p className="font-black text-xs uppercase tracking-widest">{message.text}</p>
+                        <p className="font-bold text-xs uppercase tracking-widest">{message.text}</p>
                     </div>
                 )}
 
@@ -178,13 +178,13 @@ const Profile = () => {
                             </div>
 
                             <div className="flex-1 pb-4 text-center md:text-left">
-                                <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tight mb-3 uppercase">{user.full_name || user.username}</h1>
+                                <h1 className="text-4xl font-bold text-[var(--text-main)] tracking-tight mb-3 uppercase">{user.full_name || user.username}</h1>
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                    <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+                                    <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400">
                                         {user.role}
                                     </span>
                                     <div className="h-1.5 w-1.5 bg-[var(--border-main)] rounded-full"></div>
-                                    <span className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em]">
+                                    <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-[0.2em]">
                                         Joined {user.created_at ? new Date(user.created_at).toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' }) : 'Noma\'lum'}
                                     </span>
                                 </div>
@@ -193,7 +193,7 @@ const Profile = () => {
                             {!isEditing && (
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="mb-4 flex items-center gap-3 px-8 py-3.5 bg-[var(--bg-main)] border border-[var(--border-main)] text-[var(--text-main)] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 duration-300"
+                                    className="mb-4 flex items-center gap-3 px-8 py-3.5 bg-[var(--bg-main)] border border-[var(--border-main)] text-[var(--text-main)] rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 duration-300"
                                 >
                                     <Edit2 size={18} className="text-indigo-400" />
                                     Tahrirlash
@@ -209,12 +209,12 @@ const Profile = () => {
                                         <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                                             <UserIcon size={20} className="text-indigo-400" />
                                         </div>
-                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Umumiy Ma'lumotlar</h3>
+                                        <h3 className="text-[var(--text-main)] font-bold uppercase tracking-tight text-lg">Umumiy Ma'lumotlar</h3>
                                     </div>
 
                                     <div className="space-y-6">
                                         <div className="group/input">
-                                            <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-3 ml-1">To'liq ism</label>
+                                            <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-3 ml-1">To'liq ism</label>
                                             <input
                                                 type="text"
                                                 name="full_name"
@@ -227,7 +227,7 @@ const Profile = () => {
                                         </div>
 
                                         <div className="group/input opacity-80">
-                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Foydalanuvchi nomi</label>
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Foydalanuvchi nomi</label>
                                             <input
                                                 type="text"
                                                 disabled={true}
@@ -247,12 +247,12 @@ const Profile = () => {
                                         <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20">
                                             <Mail size={20} className="text-purple-400" />
                                         </div>
-                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Aloqa Ma'lumotlari</h3>
+                                        <h3 className="text-[var(--text-main)] font-bold uppercase tracking-tight text-lg">Aloqa Ma'lumotlari</h3>
                                     </div>
 
                                     <div className="space-y-6">
                                         <div className="group/input">
-                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Email Address</label>
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Email Address</label>
                                             <div className="relative">
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors" size={20} />
                                                 <input
@@ -268,7 +268,7 @@ const Profile = () => {
                                         </div>
 
                                         <div className="group/input">
-                                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Telefon raqam</label>
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Telefon raqam</label>
                                             <div className="relative">
                                                 <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors" size={20} />
                                                 <input
@@ -291,7 +291,7 @@ const Profile = () => {
                                         <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
                                             <FileText size={20} className="text-blue-400" />
                                         </div>
-                                        <h3 className="text-[var(--text-main)] font-black uppercase tracking-tight text-lg">Men haqimda (Bio)</h3>
+                                        <h3 className="text-[var(--text-main)] font-bold uppercase tracking-tight text-lg">Men haqimda (Bio)</h3>
                                     </div>
                                     <div className="group/input">
                                         <textarea
@@ -312,7 +312,7 @@ const Profile = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsEditing(false)}
-                                        className="w-full sm:w-auto px-10 py-4 bg-white/5 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border border-white/5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+                                        className="w-full sm:w-auto px-10 py-4 bg-white/5 text-slate-400 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] border border-white/5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
                                     >
                                         Bekor qilish
                                     </button>
@@ -320,7 +320,7 @@ const Profile = () => {
                                         type="button"
                                         onClick={handleSubmit}
                                         disabled={loading}
-                                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:bg-slate-800 disabled:text-slate-500 cursor-pointer relative z-50"
+                                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-12 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:bg-slate-800 disabled:text-slate-500 cursor-pointer relative z-50"
                                     >
                                         {loading ? (
                                             <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>

@@ -22,9 +22,7 @@ async def get_analytics_overview(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Barcha asosiy statistikalarni olish (faqat admin)"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Faqat adminlar ko'ra oladi")
+    """Barcha asosiy statistikalarni olish"""
 
     now = datetime.now(timezone.utc)
     date_limit = now - timedelta(days=days)
@@ -116,9 +114,7 @@ async def get_match_stats(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Rezyumalarning moslik foizlari bo'yicha taqsimoti (faqat admin)"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Faqat adminlar ko'ra oladi")
+    """Rezyumalarning moslik foizlari bo'yicha taqsimoti"""
 
     date_limit = datetime.now(timezone.utc) - timedelta(days=days)
     apps = (
@@ -214,9 +210,7 @@ async def get_monthly_stats(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Oylik o'sish statistikasi (faqat admin)"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Faqat adminlar ko'ra oladi")
+    """Oylik o'sish statistikasi"""
 
     stats = []
     # Oxirgi 6 oyni olish

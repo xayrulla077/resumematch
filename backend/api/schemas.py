@@ -60,7 +60,11 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     bio: Optional[str] = None
+    location: Optional[str] = None
     profile_image: Optional[str] = None
+    linkedin: Optional[str] = None
+    facebook: Optional[str] = None
+    instagram: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -513,3 +517,68 @@ class ResumeBuilderData(BaseModel):
     linkedin: Optional[str] = None
     github: Optional[str] = None
     website: Optional[str] = None
+
+
+# Profile Component Schemas
+class ExperienceBase(BaseModel):
+    company: str
+    position: str
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    description: Optional[str] = None
+    is_current: bool = False
+
+class ExperienceCreate(ExperienceBase):
+    pass
+
+class ExperienceResponse(ExperienceBase):
+    id: int
+    user_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class EducationBase(BaseModel):
+    institution: str
+    degree: Optional[str] = None
+    field_of_study: Optional[str] = None
+    graduation_year: Optional[str] = None
+    is_completed: bool = True
+
+class EducationCreate(EducationBase):
+    pass
+
+class EducationResponse(EducationBase):
+    id: int
+    user_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class LanguageBase(BaseModel):
+    language: str
+    level: Optional[str] = None
+
+class LanguageCreate(LanguageBase):
+    pass
+
+class LanguageResponse(LanguageBase):
+    id: int
+    user_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class ProfileCompletionStep(BaseModel):
+    id: str
+    title: str
+    description: str
+    completed: bool
+    fields: List[Dict[str, Any]] = []
+
+class ProfileCompletionResponse(BaseModel):
+    total_percentage: int
+    is_complete: bool
+    missing_fields: List[Dict[str, Any]] = []
+    next_step: Optional[Dict[str, Any]] = None
+    breakdown: Dict[str, int] = {}
+
+class ProfileWizardResponse(BaseModel):
+    steps: List[ProfileCompletionStep]
+    progress: int
+    completed_steps: int
+    total_steps: int

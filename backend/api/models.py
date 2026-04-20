@@ -24,7 +24,13 @@ class User(Base):
     full_name = Column(String)
     phone = Column(String)
     bio = Column(Text)
+    location = Column(String)
     profile_image = Column(String)  # Image URL or path
+    
+    # Social links
+    linkedin = Column(String)
+    facebook = Column(String)
+    instagram = Column(String)
     role = Column(String, default="candidate", index=True)  # admin, employer, candidate
     company_name = Column(String)  # For employers
     company_logo = Column(String)  # For employers
@@ -41,6 +47,9 @@ class User(Base):
     resumes = relationship("Resume", back_populates="user")
     jobs = relationship("Job", back_populates="creator")
     notifications = relationship("Notification", back_populates="user")
+    experience = relationship("UserExperience", back_populates="user", cascade="all, delete-orphan")
+    education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
+    languages = relationship("UserLanguage", back_populates="user", cascade="all, delete-orphan")
 
 
 class Resume(Base):
@@ -473,4 +482,48 @@ class CompanyReview(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationship
+    # Relationship
     user = relationship("User")
+
+
+class UserExperience(Base):
+    __tablename__ = "user_experience"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    company = Column(String, nullable=False)
+    position = Column(String, nullable=False)
+    start_date = Column(String)  # Month Year
+    end_date = Column(String)    # Month Year or "Present"
+    description = Column(Text)
+    is_current = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="experience")
+
+
+class UserEducation(Base):
+    __tablename__ = "user_education"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    institution = Column(String, nullable=False)
+    degree = Column(String)  # e.g. Bakalavr, Magistr
+    field_of_study = Column(String)
+    graduation_year = Column(String)
+    is_completed = Column(Boolean, default=True)
+
+    user = relationship("User", back_populates="education")
+
+
+class UserLanguage(Base):
+    __tablename__ = "user_languages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    language = Column(String, nullable=False)
+    level = Column(String)  # e.g. A1, B2, IELTS 7.0, Ona tili
+
+    user = relationship("User", back_populates="languages")

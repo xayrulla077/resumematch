@@ -203,12 +203,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             className="flex items-center gap-4 group cursor-pointer"
             onClick={() => handleNavigate('/')}
           >
-            <div className="w-12 h-12 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 font-black italic text-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+            <div className="w-12 h-12 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 font-bold italic text-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
               RM
             </div>
             <div>
-              <h1 className="text-xl font-black text-white tracking-[0.2em] leading-none">MATCHER</h1>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mt-1.5 opacity-80">
+              <h1 className="text-xl font-bold text-white tracking-[0.2em] leading-none">MATCHER</h1>
+              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.3em] mt-1.5 opacity-80">
                 Intelligence
               </p>
             </div>
@@ -235,7 +235,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-[#121827] animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                   )}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">{t('notifications')}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">{t('notifications')}</span>
               </div>
               <div className={`transition-transform duration-300 ${showNotifications ? 'rotate-180' : ''}`}>
                 <ChevronDown size={14} />
@@ -245,14 +245,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {showNotifications && (
               <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-[var(--bg-surface)] backdrop-blur-3xl border border-[var(--border-main)] rounded-[2rem] shadow-2xl z-[70] overflow-hidden animate-in zoom-in-95 slide-in-from-top-4 duration-300">
                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                  <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('recentMessages')}</span>
-                  <button onClick={handleMarkAllRead} className="text-[8px] font-black uppercase text-indigo-400 hover:text-indigo-300 tracking-widest transition-colors">{t('markAllRead')}</button>
+                  <span className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t('recentMessages')}</span>
+                  <button onClick={handleMarkAllRead} className="text-[8px] font-bold uppercase text-indigo-400 hover:text-indigo-300 tracking-widest transition-colors">{t('markAllRead')}</button>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                   {notifications.length === 0 ? (
                     <div className="p-10 text-center">
                       <Bell className="mx-auto w-8 h-8 text-slate-700 mb-3 opacity-20" />
-                      <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest">{t('noMessages')}</p>
+                      <p className="text-[10px] font-bold uppercase text-slate-600 tracking-widest">{t('noMessages')}</p>
                     </div>
                   ) : (
                     notifications.map((notif, idx) => (
@@ -262,11 +262,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         className={`p-4 border-b border-white/5 hover:bg-white/5 transition-all cursor-pointer relative group ${!notif.is_read ? 'bg-indigo-500/5' : ''}`}
                       >
                         {!notif.is_read && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-500 rounded-r-full" />}
-                        <h4 className={`text-[11px] font-black uppercase tracking-tight mb-1 ${!notif.is_read ? 'text-white' : 'text-slate-400'}`}>{notif.title}</h4>
+                        <h4 className={`text-[11px] font-bold uppercase tracking-tight mb-1 ${!notif.is_read ? 'text-white' : 'text-slate-400'}`}>{notif.title}</h4>
                         <p className="text-[10px] text-slate-500 font-bold leading-relaxed mb-2 line-clamp-2">{notif.message}</p>
                         <div className="flex items-center gap-2">
                           <Clock size={10} className="text-slate-600" />
-                          <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                          <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">
                             {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale })}
                           </span>
                         </div>
@@ -275,7 +275,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   )}
                 </div>
                 <div className="p-3 bg-white/[0.02] text-center border-t border-white/5">
-                  <button onClick={() => setShowNotifications(false)} className="text-[10px] font-black uppercase text-slate-500 hover:text-white transition-colors tracking-widest">{t('close')}</button>
+                  <button onClick={() => setShowNotifications(false)} className="text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-colors tracking-widest">{t('close')}</button>
                 </div>
               </div>
             )}
@@ -284,7 +284,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
         <nav className="flex-1 px-6 space-y-1 mt-2 overflow-y-auto no-scrollbar">
           <div className="px-4 mb-4">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('menu')}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">{t('menu')}</span>
           </div>
 
           {menuItems.map((item, index) => {
@@ -327,7 +327,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 </span>
 
                 {item.hasBadge && notificationCount > 0 && !isActive && (
-                  <div className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-lg shadow-rose-500/20 min-w-[22px] text-center">
+                  <div className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-lg shadow-rose-500/20 min-w-[22px] text-center">
                     {notificationCount}
                   </div>
                 )}
@@ -336,7 +336,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           })}
 
           <div className="px-4 mb-4">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{t('account')}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">{t('account')}</span>
           </div>
 
           <button
@@ -372,11 +372,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             className="flex items-center gap-4 mb-5 p-3 rounded-2xl group hover:bg-white/5 transition-all duration-300 cursor-pointer"
             onClick={() => handleNavigate('/profile')}
           >
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black shadow-xl group-hover:scale-110 transition-transform flex-shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-xl group-hover:scale-110 transition-transform flex-shrink-0">
               {(user?.username || 'U').charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-black text-white truncate uppercase tracking-tight">
+              <p className="text-sm font-bold text-white truncate uppercase tracking-tight">
                 {user?.username || 'User'}
               </p>
               <p className="text-[10px] font-bold text-slate-500 truncate lowercase mt-0.5">
@@ -384,7 +384,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </p>
             </div>
             {user?.role === 'admin' && (
-              <span className="text-[9px] font-black bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-lg uppercase tracking-widest flex-shrink-0">
+              <span className="text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-lg uppercase tracking-widest flex-shrink-0">
                 Admin
               </span>
             )}
@@ -396,7 +396,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className="flex flex-col items-center justify-center py-2.5 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl text-slate-300 transition-all border border-[var(--border-main)]"
             >
               <span className="text-sm">{currentLang?.flag}</span>
-              <span className="text-[8px] font-black uppercase tracking-widest">{currentLang?.name}</span>
+              <span className="text-[8px] font-bold uppercase tracking-widest">{currentLang?.name}</span>
             </button>
 
             <button
@@ -404,7 +404,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className="flex flex-col items-center justify-center py-2.5 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl text-slate-300 transition-all border border-[var(--border-main)]"
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} className="text-indigo-400" />}
-              <span className="text-[8px] font-black uppercase tracking-widest mt-0.5">
+              <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5">
                 {theme === 'dark' ? 'LIGHT' : 'DARK'}
               </span>
             </button>
@@ -414,7 +414,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className="flex flex-col items-center justify-center py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/20 group"
             >
               <LogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />
-              <span className="text-[8px] font-black uppercase tracking-widest mt-0.5">{t('logout')}</span>
+              <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5">{t('logout')}</span>
             </button>
           </div>
 
@@ -435,7 +435,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 >
                   <span className="flex items-center gap-3">
                     <span className="text-lg">{lang.flag}</span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{lang.name}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{lang.name}</span>
                   </span>
                   {language === lang.code && (
                     <div className="w-2 h-2 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)]" />

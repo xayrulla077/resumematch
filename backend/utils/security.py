@@ -16,8 +16,7 @@ def sanitize_input(text: str, max_length: int = 1000) -> str:
     if not isinstance(text, str):
         text = str(text)
 
-    # HTML entitylarni encode qilish (XSS oldini olish)
-    text = html.escape(text)
+    # Script va style taglarni olib tashlash (html.escape olib tashlandi, matn buzulmasligi uchun)
 
     # Script va style taglarni olib tashlash
     text = re.sub(

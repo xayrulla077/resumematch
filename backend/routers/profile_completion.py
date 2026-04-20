@@ -1,263 +1,140 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from api.database import get_db
-from api import models
+from api import models, schemas
 from api.auth import get_current_active_user
+from typing import List
 
 router = APIRouter()
 
 
-@router.get("/profile-completion")
+@router.get("/profile-completion", response_model=schemas.ProfileCompletionResponse)
 async def get_profile_completion(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Profile to'liqligini hisoblash"""
+    """Profil to'liqligini kengaytirilgan qoidalar asosida hisoblash"""
 
-    # Profile fields to check
-    fields = {
-        "full_name": current_user.full_name,
-        "email": current_user.email,
-        "phone": current_user.phone,
-        "bio": current_user.bio,
-        "location": current_user.location,
-        "profile_image": current_user.profile_image,
-    }
+    # 1. Basic Info (10%)
+    basic_fields = [current_user.full_name, current_user.phone, current_user.location]
+    filled_basic = sum(1 for v in basic_fields if v)
+    basic_percentage = round((filled_basic / len(basic_fields)) * 10) if basic_fields else 0
 
-    # Calculate filled fields
-    filled_basic = sum(1 for v in fields.values() if v)
-    total_basic = len(fields)
-    basic_percentage = round((filled_basic / total_basic) * 100)
+    # 2. About/Bio (10%)
+    bio_percentage = 10 if current_user.bio and len(current_user.bio) > 20 else 0
 
-    # Social links
-    social_fields = {
-        "linkedin": current_user.linkedin,
-        "facebook": current_user.facebook,
-        "instagram": current_user.instagram,
-    }
-    filled_social = sum(1 for v in social_fields.values() if v)
-    total_social = len(social_fields)
-    social_percentage = (
-        round((filled_social / total_social) * 100) if total_social > 0 else 0
-    )
+    # 3. Photo (5%)
+    photo_percentage = 5 if current_user.profile_image else 0
 
-    # Resume check
-    resume = (
-        db.query(models.Resume).filter(models.Resume.user_id == current_user.id).first()
-    )
-    resume_percentage = 50 if resume else 0
+    # 4. Experience (25%)
+    exp_count = db.query(models.UserExperience).filter(models.UserExperience.user_id == current_user.id).count()
+    experience_percentage = min(25, exp_count * 12.5) # 1 entry = 12.5%, 2 entries = 25%
 
-    # Skills check
-    skills = (
-        db.query(models.UserSkill)
-        .filter(models.UserSkill.user_id == current_user.id)
-        .count()
-    )
-    skills_percentage = min(50, skills * 10)  # Max 50% for skills
+    # 5. Education (20%)
+    edu_count = db.query(models.UserEducation).filter(models.UserEducation.user_id == current_user.id).count()
+    education_percentage = min(20, edu_count * 20) # 1 entry = 20%
 
-    # Job alerts check
-    job_alert = (
-        db.query(models.JobAlert)
-        .filter(models.JobAlert.user_id == current_user.id)
-        .first()
-    )
-    alerts_percentage = 25 if job_alert else 0
+    # 6. Skills (15%)
+    skills_count = db.query(models.UserSkill).filter(models.UserSkill.user_id == current_user.id).count()
+    skills_percentage = min(15, skills_count * 5) # 3 skills = 15%
 
-    # Video resume check
-    video = (
-        db.query(models.VideoResume)
-        .filter(models.VideoResume.user_id == current_user.id)
-        .first()
-    )
-    video_percentage = 25 if video else 0
+    # 7. Languages (10%)
+    lang_count = db.query(models.UserLanguage).filter(models.UserLanguage.user_id == current_user.id).count()
+    languages_percentage = min(10, lang_count * 10)
 
-    # Total completion (weighted)
+    # 8. Resume (5%)
+    resume = db.query(models.Resume).filter(models.Resume.user_id == current_user.id).first()
+    resume_percentage = 5 if resume else 0
+
     total = (
-        basic_percentage
-        + social_percentage
-        + resume_percentage
-        + skills_percentage
-        + alerts_percentage
-        + video_percentage
+        basic_percentage + bio_percentage + photo_percentage + 
+        experience_percentage + education_percentage + 
+        skills_percentage + languages_percentage + resume_percentage
     )
-    total = min(100, total)
 
-    # Missing fields list
+    # Missing fields
     missing = []
-    if not current_user.full_name:
-        missing.append({"field": "full_name", "label": "Full Name", "priority": "high"})
-    if not current_user.phone:
-        missing.append({"field": "phone", "label": "Phone", "priority": "high"})
-    if not current_user.bio:
-        missing.append({"field": "bio", "label": "Bio", "priority": "medium"})
-    if not current_user.location:
-        missing.append({"field": "location", "label": "Location", "priority": "medium"})
-    if not current_user.profile_image:
-        missing.append(
-            {"field": "profile_image", "label": "Profile Photo", "priority": "medium"}
-        )
-    if not resume:
-        missing.append({"field": "resume", "label": "Resume", "priority": "high"})
-    if skills == 0:
-        missing.append({"field": "skills", "label": "Skills", "priority": "high"})
-    if not job_alert:
-        missing.append(
-            {"field": "job_alerts", "label": "Job Alerts", "priority": "low"}
-        )
-    if not video:
-        missing.append(
-            {"field": "video_resume", "label": "Video Resume", "priority": "low"}
-        )
+    if not current_user.full_name: missing.append({"field": "basic", "label": t("fullName", "Full Name")})
+    if exp_count == 0: missing.append({"field": "experience", "label": t("experience", "Work Experience")})
+    if edu_count == 0: missing.append({"field": "education", "label": t("education", "Education")})
+    if skills_count < 3: missing.append({"field": "skills", "label": t("skills", "Skills")})
+    if lang_count == 0: missing.append({"field": "languages", "label": t("languages", "Languages")})
 
     return {
-        "total_percentage": total,
+        "total_percentage": int(total),
         "breakdown": {
-            "basic_info": basic_percentage,
-            "social_links": social_percentage,
-            "resume": resume_percentage,
-            "skills": skills_percentage,
-            "job_alerts": alerts_percentage,
-            "video_resume": video_percentage,
+            "basic": int(basic_percentage),
+            "bio": int(bio_percentage),
+            "experience": int(experience_percentage),
+            "education": int(education_percentage),
+            "skills": int(skills_percentage),
+            "languages": int(languages_percentage),
+            "resume": int(resume_percentage)
         },
-        "is_complete": total >= 80,
+        "is_complete": total >= 90,
         "missing_fields": missing,
         "next_step": missing[0] if missing else None,
     }
 
+def t(key, default):
+    # Bu yerda translation logic bo'lishi mumkin, hozircha sodda
+    return default
 
-@router.get("/profile-wizard-steps")
+
+@router.get("/profile-wizard-steps", response_model=schemas.ProfileWizardResponse)
 async def get_wizard_steps(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
-    """Profile wizard uchun qadamma-qadam ma'lumotlari"""
+    """Profile wizard uchun barcha qadamma-qadam ma'lumotlari"""
 
     steps = [
         {
             "id": "basic",
-            "title": "Basic Information",
-            "description": "Your name, contact info, and location",
+            "title": "Asosiy ma'lumotlar",
+            "description": "Ismingiz, telefon raqamingiz va manzilingiz",
+            "completed": bool(current_user.full_name and current_user.phone),
             "fields": [
-                {
-                    "key": "full_name",
-                    "label": "Full Name",
-                    "type": "text",
-                    "filled": bool(current_user.full_name),
-                },
-                {
-                    "key": "email",
-                    "label": "Email",
-                    "type": "email",
-                    "filled": bool(current_user.email),
-                    "readonly": True,
-                },
-                {
-                    "key": "phone",
-                    "label": "Phone",
-                    "type": "tel",
-                    "filled": bool(current_user.phone),
-                },
-                {
-                    "key": "location",
-                    "label": "Location",
-                    "type": "text",
-                    "filled": bool(current_user.location),
-                },
-            ],
-            "completed": bool(
-                current_user.full_name and current_user.phone and current_user.location
-            ),
+                {"key": "full_name", "label": "To'liq ism", "type": "text", "filled": bool(current_user.full_name)},
+                {"key": "phone", "label": "Telefon", "type": "tel", "filled": bool(current_user.phone)},
+                {"key": "location", "label": "Manzil", "type": "text", "filled": bool(current_user.location)},
+            ]
         },
         {
-            "id": "about",
-            "title": "About You",
-            "description": "Tell employers about yourself",
-            "fields": [
-                {
-                    "key": "bio",
-                    "label": "Bio",
-                    "type": "textarea",
-                    "filled": bool(current_user.bio),
-                },
-            ],
-            "completed": bool(current_user.bio),
+            "id": "experience",
+            "title": "Ish tajribasi",
+            "description": "Qayerda va qancha ishlaganingiz haqida ma'lumot",
+            "completed": db.query(models.UserExperience).filter(models.UserExperience.user_id == current_user.id).count() > 0,
+            "fields": []
         },
         {
-            "id": "photo",
-            "title": "Profile Photo",
-            "description": "Add a professional photo",
-            "fields": [
-                {
-                    "key": "profile_image",
-                    "label": "Photo",
-                    "type": "file",
-                    "filled": bool(current_user.profile_image),
-                },
-            ],
-            "completed": bool(current_user.profile_image),
-        },
-        {
-            "id": "resume",
-            "title": "Resume",
-            "description": "Upload your resume",
-            "fields": [
-                {
-                    "key": "resume",
-                    "label": "Resume",
-                    "type": "upload",
-                    "has_data": db.query(models.Resume)
-                    .filter(models.Resume.user_id == current_user.id)
-                    .first()
-                    is not None,
-                },
-            ],
-            "completed": db.query(models.Resume)
-            .filter(models.Resume.user_id == current_user.id)
-            .first()
-            is not None,
+            "id": "education",
+            "title": "Ta'lim",
+            "description": "O'qigan joyingiz va diplom darajangiz",
+            "completed": db.query(models.UserEducation).filter(models.UserEducation.user_id == current_user.id).count() > 0,
+            "fields": []
         },
         {
             "id": "skills",
-            "title": "Skills",
-            "description": "Add your skills for better matching",
-            "fields": [
-                {
-                    "key": "skills",
-                    "label": "Skills",
-                    "type": "list",
-                    "count": db.query(models.UserSkill)
-                    .filter(models.UserSkill.user_id == current_user.id)
-                    .count(),
-                },
-            ],
-            "completed": db.query(models.UserSkill)
-            .filter(models.UserSkill.user_id == current_user.id)
-            .count()
-            >= 3,
+            "title": "Ko'nikmalar",
+            "description": "Siz biladigan texnologiyalar va mahoratlar",
+            "completed": db.query(models.UserSkill).filter(models.UserSkill.user_id == current_user.id).count() >= 3,
+            "fields": []
         },
         {
-            "id": "alerts",
-            "title": "Job Alerts",
-            "description": "Get notified about new jobs",
-            "fields": [
-                {
-                    "key": "job_alerts",
-                    "label": "Job Alerts",
-                    "type": "toggle",
-                    "enabled": db.query(models.JobAlert)
-                    .filter(
-                        models.JobAlert.user_id == current_user.id,
-                        models.JobAlert.enabled == True,
-                    )
-                    .first()
-                    is not None,
-                },
-            ],
-            "completed": db.query(models.JobAlert)
-            .filter(models.JobAlert.user_id == current_user.id)
-            .first()
-            is not None,
+            "id": "languages",
+            "title": "Tillar",
+            "description": "Qaysi tillarni va qaysi darajada bilasiz?",
+            "completed": db.query(models.UserLanguage).filter(models.UserLanguage.user_id == current_user.id).count() > 0,
+            "fields": []
         },
+        {
+            "id": "resume",
+            "title": "Rezyume",
+            "description": "Tayyor rezyumeyingizni yuklang (PDF/DOCX)",
+            "completed": db.query(models.Resume).filter(models.Resume.user_id == current_user.id).first() is not None,
+            "fields": []
+        }
     ]
 
     completed_steps = sum(1 for s in steps if s["completed"])
@@ -267,5 +144,42 @@ async def get_wizard_steps(
         "steps": steps,
         "progress": progress,
         "completed_steps": completed_steps,
-        "total_steps": len(steps),
+        "total_steps": len(steps)
     }
+
+# POST Endpoints for saving data
+@router.post("/experience", response_model=schemas.ExperienceResponse)
+async def add_experience(
+    exp: schemas.ExperienceCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    db_exp = models.UserExperience(**exp.model_dump(), user_id=current_user.id)
+    db.add(db_exp)
+    db.commit()
+    db.refresh(db_exp)
+    return db_exp
+
+@router.post("/education", response_model=schemas.EducationResponse)
+async def add_education(
+    edu: schemas.EducationCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    db_edu = models.UserEducation(**edu.model_dump(), user_id=current_user.id)
+    db.add(db_edu)
+    db.commit()
+    db.refresh(db_edu)
+    return db_edu
+
+@router.post("/languages", response_model=schemas.LanguageResponse)
+async def add_language(
+    lang: schemas.LanguageCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user)
+):
+    db_lang = models.UserLanguage(**lang.model_dump(), user_id=current_user.id)
+    db.add(db_lang)
+    db.commit()
+    db.refresh(db_lang)
+    return db_lang
