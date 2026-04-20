@@ -278,7 +278,7 @@ async def update_job(
     return job
 
 
-@router.get("/recommended", response_model=PaginatedRecommendedJobsResponse)
+@router.get("/recommended")
 async def get_recommended_jobs(
     page: int = 1,
     limit: int = 10,

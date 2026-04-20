@@ -229,7 +229,7 @@ class JobResponse(JobBase):
     id: int
     creator_id: int
     is_active: bool
-    posted_at: datetime
+    posted_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -238,7 +238,7 @@ class JobWithApplicationsCount(JobBase):
     id: int
     creator_id: int
     is_active: bool
-    posted_at: datetime
+    posted_at: Optional[datetime] = None
     applications_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)

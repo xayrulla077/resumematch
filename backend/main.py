@@ -203,11 +203,10 @@ if env_origins:
 # Logging CORS origins to help debug
 print(f"CORS origins configured: {CORS_ORIGINS}")
 
-# CORS - kengaytirilgan ruxsat
+# CORS - xavfsiz universal ruxsat (credentials bilan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if os.getenv("DEBUG") == "True" else CORS_ORIGINS,
-    allow_origin_regex="https?://.*resumematch\.uz" if os.getenv("DEBUG") != "True" else None,
+    allow_origin_regex="https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
