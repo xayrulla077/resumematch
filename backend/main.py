@@ -114,6 +114,40 @@ from fastapi import Depends
 # Database tables yaratish
 Base.metadata.create_all(bind=engine)
 
+# Manual migration for existing tables (SQLite limitation fix)
+def patch_database():
+    try:
+        import sqlite3
+        # Get DB path from connection string or assume default
+        db_path = "resume_matcher.db"
+        if os.path.exists(db_path):
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Columns to check and add
+            columns = [
+                ('location', 'VARCHAR'),
+                ('linkedin', 'VARCHAR'),
+                ('facebook', 'VARCHAR'),
+                ('instagram', 'VARCHAR')
+            ]
+            
+            cursor.execute("PRAGMA table_info(users)")
+            existing = [col[1] for col in cursor.fetchall()]
+            
+            for col_name, col_type in columns:
+                if col_name not in existing:
+                    print(f"Migration: Adding {col_name} to users table")
+                    cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        print(f"Migration error: {e}")
+
+# Run patch before starting app
+patch_database()
+
 app = FastAPI(
     title="Resume Matcher API",
     description="AI-powered resume and job matching platform",

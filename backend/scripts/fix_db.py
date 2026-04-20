@@ -1,33 +1,38 @@
-#!/usr/bin/env python
 import sqlite3
 import os
 
-db_path = os.path.join(os.path.dirname(__file__), "resume_matcher.db")
-print(f"Database path: {db_path}")
-print(f"Exists: {os.path.exists(db_path)}")
+def fix_database():
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'resume_matcher.db')
+    print(f"Connecting to database at: {db_path}")
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # 1. Add missing columns to users table
+    columns_to_add = [
+        ('location', 'VARCHAR'),
+        ('linkedin', 'VARCHAR'),
+        ('facebook', 'VARCHAR'),
+        ('instagram', 'VARCHAR')
+    ]
+    
+    cursor.execute("PRAGMA table_info(users)")
+    existing_columns = [col[1] for col in cursor.fetchall()]
+    
+    for col_name, col_type in columns_to_add:
+        if col_name not in existing_columns:
+            print(f"Adding column {col_name} to users table...")
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+                print(f"Column {col_name} added successfully.")
+            except Exception as e:
+                print(f"Error adding column {col_name}: {e}")
+        else:
+            print(f"Column {col_name} already exists.")
+            
+    conn.commit()
+    conn.close()
+    print("Database fix completed.")
 
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
-
-# Check resumes table
-cursor.execute("PRAGMA table_info(resumes)")
-cols = cursor.fetchall()
-print("\nCurrent resumes columns:")
-for col in cols:
-    print(f"  {col[1]}")
-
-# Add missing columns
-missing_cols = ["certifications", "projects", "achievements"]
-existing_cols = [col[1] for col in cols]
-
-for col_name in missing_cols:
-    if col_name not in existing_cols:
-        try:
-            cursor.execute(f"ALTER TABLE resumes ADD COLUMN {col_name} TEXT")
-            conn.commit()
-            print(f"Added column: {col_name}")
-        except Exception as e:
-            print(f"Error adding {col_name}: {e}")
-
-conn.close()
-print("\nDone!")
+if __name__ == "__main__":
+    fix_database()
