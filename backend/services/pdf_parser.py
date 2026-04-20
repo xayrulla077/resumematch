@@ -113,8 +113,19 @@ async def parse_resume_smart(text: str) -> Dict[str, Any]:
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
 
+        import html
+        def unescape_recursive(d):
+            if isinstance(d, dict):
+                return {k: unescape_recursive(v) for k, v in d.items()}
+            if isinstance(d, list):
+                return [unescape_recursive(v) for v in d]
+            if isinstance(d, str):
+                # Double unescape to handle cases like &amp;#x27;
+                return html.unescape(html.unescape(d))
+            return d
+
         data = json.loads(content.strip())
-        return data
+        return unescape_recursive(data)
 
     except Exception as e:
         print(f"Smart parsing error: {e}")

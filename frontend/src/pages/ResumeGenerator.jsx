@@ -80,6 +80,16 @@ const ResumeGenerator = () => {
     }
   };
 
+  const decodeHTML = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    const txt = document.createElement('textarea');
+    txt.innerHTML = text;
+    const firstDecode = txt.value;
+    // Double decode for cases like &amp;#x27;
+    txt.innerHTML = firstDecode;
+    return txt.value;
+  };
+
   const selectResume = (resume) => {
     setSelectedResume(resume);
     // Parse resume data
@@ -98,16 +108,28 @@ const ResumeGenerator = () => {
     }
 
     setResumeData({
-      full_name: user?.full_name || '',
-      title: resume.title || 'Professional',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      location: resume.location || '',
-      linkedin: user?.linkedin || '',
-      summary: resume.summary || '',
-      skills: skillsArray,
-      experience: resume.experience ? (typeof resume.experience === 'string' ? JSON.parse(resume.experience) : resume.experience) : [],
-      education: resume.education ? (typeof resume.education === 'string' ? JSON.parse(resume.education) : resume.education) : [],
+      full_name: decodeHTML(user?.full_name || resume.full_name || ''),
+      title: decodeHTML(resume.title || 'Professional'),
+      email: decodeHTML(user?.email || resume.email || ''),
+      phone: decodeHTML(user?.phone || resume.phone || ''),
+      location: decodeHTML(resume.location || ''),
+      linkedin: decodeHTML(user?.linkedin || resume.linkedin || ''),
+      summary: decodeHTML(resume.summary || ''),
+      skills: skillsArray.map(s => decodeHTML(s)),
+      experience: resume.experience ? 
+        (typeof resume.experience === 'string' ? JSON.parse(resume.experience) : resume.experience).map(e => ({
+          ...e,
+          company: decodeHTML(e.company),
+          position: decodeHTML(e.position),
+          location: decodeHTML(e.location),
+          responsibilities: e.responsibilities?.map(r => decodeHTML(r)) || []
+        })) : [],
+      education: resume.education ? 
+        (typeof resume.education === 'string' ? JSON.parse(resume.education) : resume.education).map(edu => ({
+          ...edu,
+          school: decodeHTML(edu.school),
+          degree: decodeHTML(edu.degree)
+        })) : [],
       languages: resume.languages ? (typeof resume.languages === 'string' ? JSON.parse(resume.languages) : resume.languages) : []
     });
   };
