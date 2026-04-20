@@ -203,12 +203,12 @@ if env_origins:
 # Logging CORS origins to help debug
 print(f"CORS origins configured: {CORS_ORIGINS}")
 
+# CORS - kengaytirilgan ruxsat
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True
-    if CORS_ORIGINS != ["*"]
-    else False,  # Credentials not allowed with "*"
+    allow_origins=["*"] if os.getenv("DEBUG") == "True" else CORS_ORIGINS,
+    allow_origin_regex="https?://.*resumematch\.uz" if os.getenv("DEBUG") != "True" else None,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],

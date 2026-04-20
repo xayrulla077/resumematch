@@ -103,35 +103,54 @@ async def get_company_reviews(company_name: str, db: Session = Depends(get_db)):
 
 @router.get("/")
 async def get_all_reviews(
-    search: str = None, limit: int = 20, db: Session = Depends(get_db)
+    search: str = None, limit: int = 50, db: Session = Depends(get_db)
 ):
-    """Barcha reviews (search bilan)"""
-    query = db.query(models.CompanyReview)
-
+    """Barcha korxonalarni olish (izohlar bilan birga)"""
+    # 1. Barcha/Qidirilgan korxonalarni CompanyProfile dan olamiz
+    query = db.query(models.CompanyProfile)
     if search:
-        query = query.filter(models.CompanyReview.company_name.ilike(f"%{search}%"))
-
-    reviews = query.order_by(models.CompanyReview.created_at.desc()).limit(limit).all()
-
-    # Group by company
-    company_ratings = {}
-    for r in reviews:
-        if r.company_name not in company_ratings:
-            company_ratings[r.company_name] = {"total": 0, "count": 0}
-        company_ratings[r.company_name]["total"] += r.rating
-        company_ratings[r.company_name]["count"] += 1
-
+        query = query.filter(models.CompanyProfile.company_name.ilike(f"%{search}%"))
+    
+    profiles = query.limit(limit).all()
+    
+    # 2. Izohlar statistikani olish
     results = []
-    for company, data in company_ratings.items():
-        results.append(
-            {
-                "company": company,
-                "average_rating": round(data["total"] / data["count"], 1),
-                "total_reviews": data["count"],
-            }
-        )
+    for p in profiles:
+        reviews = db.query(models.CompanyReview).filter(models.CompanyReview.company_name == p.company_name).all()
+        count = len(reviews)
+        avg = round(sum(r.rating for r in reviews) / count, 1) if count > 0 else 0
+        
+        results.append({
+            "company": p.company_name,
+            "average_rating": avg,
+            "total_reviews": count,
+            "industry": p.industry,
+            "logo_url": p.logo_url
+        })
 
-    results.sort(key=lambda x: x["total_reviews"], reverse=True)
+    # 3. Agar CompanyProfile da yo'q lekin Review yozilgan bo'lsa ularni ham qo'shamiz (eskilar uchun)
+    review_companies_query = db.query(models.CompanyReview.company_name).distinct()
+    if search:
+        review_companies_query = review_companies_query.filter(models.CompanyReview.company_name.ilike(f"%{search}%"))
+    
+    review_company_names = [r[0] for r in review_companies_query.all()]
+    existing_names = [r["company"] for r in results]
+    
+    for name in review_company_names:
+        if name not in existing_names:
+            reviews = db.query(models.CompanyReview).filter(models.CompanyReview.company_name == name).all()
+            count = len(reviews)
+            avg = round(sum(r.rating for r in reviews) / count, 1) if count > 0 else 0
+            results.append({
+                "company": name,
+                "average_rating": avg,
+                "total_reviews": count,
+                "industry": "Noma'lum",
+                "logo_url": None
+            })
+
+    # Sort: Eng ko'p izohli yoki eng yuqori reytingli
+    results.sort(key=lambda x: (x["total_reviews"], x["average_rating"]), reverse=True)
 
     return {"companies": results[:limit]}
 
