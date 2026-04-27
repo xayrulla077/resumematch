@@ -152,6 +152,7 @@ def patch_database():
                         
         print("Migration completed successfully")
     except Exception as e:
+        logger.error(f"Migration error (non-critical): {e}")
         print(f"Migration error (non-critical): {e}")
 
 # Run patch on startup
@@ -255,6 +256,15 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Explicitly add CORS headers to all responses (extra layer of protection)
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 # Create uploads directory
 os.makedirs("uploads", exist_ok=True)
 
