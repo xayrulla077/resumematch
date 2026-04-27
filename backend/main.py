@@ -191,7 +191,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     return JSONResponse(
         status_code=500,
-        content={"detail": "Ichki server xatoligi yuz berdi.", "error_id": error_id},
+        content={"detail": "Ichki server xatoligi yuz berdi.", "error_id": error_id, "message": str(exc)},
     )
 
 
@@ -247,7 +247,7 @@ if env_origins:
 # Logging CORS origins to help debug
 print(f"CORS origins configured: {CORS_ORIGINS}")
 
-# CORS - maksimal muvofiqlik (Bearer token ishlatganimiz uchun credentials shart emas)
+# CORS - maksimal muvofiqlik
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -257,14 +257,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Explicitly add CORS headers to all responses (extra layer of protection)
-@app.middleware("http")
-async def add_cors_headers(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "*"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
 # Create uploads directory
 os.makedirs("uploads", exist_ok=True)
 
