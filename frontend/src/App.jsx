@@ -19,6 +19,7 @@ import Profile from './pages/Profile';
 import Interview from './pages/Interview';
 import ResumeBuilder from './pages/ResumeBuilder';
 import Intro from './pages/Intro';
+import Landing from './pages/Landing';
 import Messages from './pages/Messages';
 import Tests from './pages/Tests';
 import BestCandidates from './pages/BestCandidates';
@@ -159,8 +160,8 @@ function App() {
             />
 
             <Routes>
-              {/* Intro page - for everyone */}
-              <Route path="/" element={<Intro />} />
+              {/* Landing page - for everyone */}
+              <Route path="/" element={<Landing />} />
               
               {/* Auth pages */}
               <Route path="/register" element={<Register />} />
