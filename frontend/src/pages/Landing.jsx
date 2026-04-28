@@ -207,7 +207,7 @@ const Landing = () => {
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Tavfsilotlari</span>
                         </h2>
                         <p className="max-w-2xl mx-auto text-[var(--text-muted)] text-lg font-bold leading-relaxed">
-                            Resume Matcher AI — zamonaviy HR jarayonlarini avtomatlashtirishga yo'naltirilgan
+                            Resume Matcher AI — zamonaviy HR jarayonlarini avtomatlashtirishga yo`naltirilgan
                             intellektual platforma.
                         </p>
                         <div className="w-24 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 mx-auto rounded-full mt-8" />
@@ -249,7 +249,7 @@ const Landing = () => {
                                     mahalliy bozor ehtiyojlariga moslashtirildi va to'liq qayta yaratildi.
                                 </p>
                                 <p>
-                                    O'zbek tilidagi interfeys va mahalliy kompaniyalar uchun moslashtirilgan
+                                    O`zbek tilidagi interfeys va mahalliy kompaniyalar uchun moslashtirilgan
                                     ish oqimi uning asosiy farqlovchi xususiyatidir.
                                 </p>
                             </div>
@@ -320,10 +320,10 @@ const Landing = () => {
                     {/* Foydalari */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { icon: TrendingUp, color: 'indigo', title: 'Samaradorlik', desc: 'Rezyume tekshirish vaqtini 80% qisqartiradi va HR xodimiga strategik ishlar uchun vaqt bo'shatadi.' },
-                            { icon: CheckCircle2, color: 'emerald', title: 'Aniqlik', desc: 'Semantic tahlil orqali 95%+ to'g'ri mos kelishni ta'minlaydi, noto'g'ri rad etishlarni kamaytiradi.' },
-                            { icon: Globe, color: 'blue', title: 'Moslashuvchanlik', desc: 'Har qanday soha va lavozim uchun mos, istalgan turdagi rezyume formatini qo'llab-quvvatlaydi.' },
-                            { icon: Lock, color: 'amber', title: 'Xavfsizlik', desc: 'JWT autentifikatsiya va shifrlangan ma'lumotlar saqlash bilan barcha foydalanuvchi so'rovlari himoyalangan.' },
+                            { icon: TrendingUp, color: 'indigo', title: 'Samaradorlik', desc: `Rezyume tekshirish vaqtini 80% qisqartiradi va HR xodimiga strategik ishlar uchun vaqt bo'shatadi.` },
+                            { icon: CheckCircle2, color: 'emerald', title: 'Aniqlik', desc: `Semantic tahlil orqali 95%+ to'g'ri mos kelishni ta'minlaydi, noto'g'ri rad etishlarni kamaytiradi.` },
+                            { icon: Globe, color: 'blue', title: 'Moslashuvchanlik', desc: `Har qanday soha va lavozim uchun mos, istalgan turdagi rezyume formatini qo'llab-quvvatlaydi.` },
+                            { icon: Lock, color: 'amber', title: 'Xavfsizlik', desc: `JWT autentifikatsiya va shifrlangan ma'lumotlar saqlash bilan barcha foydalanuvchi so'rovlari himoyalangan.` },
                         ].map((b, i) => {
                             const benefitColors = {
                                 indigo:  { bg: 'bg-indigo-500/10',  border: 'border-indigo-500/20',  icon: 'text-indigo-400'  },
