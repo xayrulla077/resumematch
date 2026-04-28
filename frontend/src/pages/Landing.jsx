@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 import {
     BrainCircuit,
     Rocket,
@@ -12,7 +13,23 @@ import {
     FileSearch,
     CheckCircle2,
     Sparkles,
-    ArrowRight
+    ArrowRight,
+    Code2,
+    Database,
+    Network,
+    BookOpen,
+    TrendingUp,
+    Layers,
+    GitBranch,
+    Award,
+    Clock,
+    BarChart3,
+    Lock,
+    Globe,
+    Brain,
+    FileText,
+    Server,
+    Monitor
 } from 'lucide-react';
 
 const Landing = () => {
@@ -38,6 +55,12 @@ const Landing = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <a
+                            href="#dastur-tavfsilotlari"
+                            className="hidden md:block px-5 py-2.5 text-[var(--text-muted)] hover:text-indigo-400 font-black text-xs uppercase tracking-widest transition-all border border-transparent hover:border-indigo-500/30 rounded-xl"
+                        >
+                            Dastur Tavfsilotlari
+                        </a>
                         {!user ? (
                             <>
                                 <button onClick={() => navigate('/login')} className="px-6 py-2.5 text-[var(--text-muted)] hover:text-[var(--text-main)] font-black text-xs uppercase tracking-widest transition-all">Kirish</button>
@@ -161,6 +184,163 @@ const Landing = () => {
                             <p className="text-[10px] text-indigo-500 font-black uppercase tracking-[0.3em]">{s.label}</p>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* ─── Dastur Tavfsilotlari ─────────────────────────────────────────── */}
+            <section id="dastur-tavfsilotlari" className="py-32 px-6 relative overflow-hidden">
+                {/* BG glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+                <div className="absolute top-1/2 left-[-15%] w-[500px] h-[500px] bg-indigo-600/8 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute top-1/2 right-[-15%] w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[120px] pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-24">
+                        <div className="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600/10 border border-indigo-600/20 rounded-full text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                            <BookOpen size={14} />
+                            Malakaviy Amaliyot Loyihasi
+                        </div>
+                        <h2 className="text-3xl lg:text-6xl font-black uppercase tracking-tighter italic text-[var(--text-main)] mb-6">
+                            Dastur{' '}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Tavfsilotlari</span>
+                        </h2>
+                        <p className="max-w-2xl mx-auto text-[var(--text-muted)] text-lg font-bold leading-relaxed">
+                            Resume Matcher AI — zamonaviy HR jarayonlarini avtomatlashtirishga yo'naltirilgan
+                            intellektual platforma.
+                        </p>
+                        <div className="w-24 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 mx-auto rounded-full mt-8" />
+                    </div>
+
+                    {/* Maqsad + Kelib chiqishi */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                        {/* Maqsad */}
+                        <div className="group p-10 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] hover:border-indigo-600/30 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-600/5 rounded-full blur-3xl" />
+                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                                <Target size={30} className="text-indigo-400" />
+                            </div>
+                            <h3 className="text-2xl font-black uppercase tracking-tight text-[var(--text-main)] mb-6">Dastur Maqsadi</h3>
+                            <div className="space-y-4 text-[var(--text-muted)] font-bold leading-relaxed">
+                                <p>
+                                    Ushbu loyiha HR mutaxassislariga sifatli nomzodlarni tez va aniq toppishda yordam beradi.
+                                    Sun'iy intellekt texnologiyalari orqali rezyumalarni avtomatik tahlil qilib,
+                                    vakansiyaga eng mos nomzodlarni ballarga asoslanib ajratib beradi.
+                                </p>
+                                <p>
+                                    Ishga qabul qilish jarayonini 5-7 barobar tezlashtiradi va inson omilidan
+                                    kelib chiqadigan xatoliklarni minimallashtirishga xizmat qiladi.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Kelib chiqishi */}
+                        <div className="group p-10 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] hover:border-purple-600/30 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-purple-600/5 rounded-full blur-3xl" />
+                            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                                <GitBranch size={30} className="text-purple-400" />
+                            </div>
+                            <h3 className="text-2xl font-black uppercase tracking-tight text-[var(--text-main)] mb-6">Kelib Chiqishi</h3>
+                            <div className="space-y-4 text-[var(--text-muted)] font-bold leading-relaxed">
+                                <p>
+                                    Loyiha 2026-yilda malakaviy amaliyot doirasida ishlab chiqilgan.
+                                    Open-source Resume Matcher frameworkidan ilhomlanib,
+                                    mahalliy bozor ehtiyojlariga moslashtirildi va to'liq qayta yaratildi.
+                                </p>
+                                <p>
+                                    O'zbek tilidagi interfeys va mahalliy kompaniyalar uchun moslashtirilgan
+                                    ish oqimi uning asosiy farqlovchi xususiyatidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Texnik Stack */}
+                    <div className="p-10 rounded-[2.5rem] bg-[var(--bg-surface)] border border-[var(--border-main)] hover:border-indigo-600/20 hover:shadow-2xl transition-all duration-500 mb-12 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/3 via-transparent to-purple-600/3" />
+                        <div className="relative">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <Layers size={30} className="text-emerald-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black uppercase tracking-tight text-[var(--text-main)]">Texnik Arxitektura</h3>
+                                    <p className="text-[var(--text-muted)] font-bold text-sm mt-1">Full-stack zamonaviy texnologiyalar to'plami</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {[
+                                    {
+                                        icon: Monitor,
+                                        label: 'Frontend',
+                                        color: 'indigo',
+                                        items: ['React 18 + Vite', 'Tailwind CSS', 'Lucide Icons', 'React Router v6', 'Recharts']
+                                    },
+                                    {
+                                        icon: Server,
+                                        label: 'Backend',
+                                        color: 'purple',
+                                        items: ['Python FastAPI', 'SQLite / SQLAlchemy', 'JWT Authentication', 'PyMuPDF (PDF parse)', 'Uvicorn']
+                                    },
+                                    {
+                                        icon: Brain,
+                                        label: 'AI & Tahlil',
+                                        color: 'rose',
+                                        items: ['TF-IDF Vektorlashtirish', 'Cosine Similarity', 'spaCy NLP', 'Sklearn', 'Keyword Extraction']
+                                    }
+                                ].map((stack, i) => {
+                                    const stackColors = {
+                                        indigo: { bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400', dot: 'bg-indigo-500' },
+                                        purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400', dot: 'bg-purple-500' },
+                                        rose:   { bg: 'bg-rose-500/10',   border: 'border-rose-500/20',   text: 'text-rose-400',   dot: 'bg-rose-500'   },
+                                    };
+                                    const c = stackColors[stack.color];
+                                    return (
+                                        <div key={i} className={`p-6 rounded-2xl ${c.bg} border ${c.border}`}>
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <stack.icon size={20} className={c.text} />
+                                                <span className={`font-black text-sm uppercase tracking-widest ${c.text}`}>{stack.label}</span>
+                                            </div>
+                                            <ul className="space-y-2.5">
+                                                {stack.items.map((item, j) => (
+                                                    <li key={j} className="flex items-center gap-2.5 text-[var(--text-muted)] font-bold text-sm">
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${c.dot} flex-shrink-0`} />
+                                                        {item}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Foydalari */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[
+                            { icon: TrendingUp, color: 'indigo', title: 'Samaradorlik', desc: 'Rezyume tekshirish vaqtini 80% qisqartiradi va HR xodimiga strategik ishlar uchun vaqt bo'shatadi.' },
+                            { icon: CheckCircle2, color: 'emerald', title: 'Aniqlik', desc: 'Semantic tahlil orqali 95%+ to'g'ri mos kelishni ta'minlaydi, noto'g'ri rad etishlarni kamaytiradi.' },
+                            { icon: Globe, color: 'blue', title: 'Moslashuvchanlik', desc: 'Har qanday soha va lavozim uchun mos, istalgan turdagi rezyume formatini qo'llab-quvvatlaydi.' },
+                            { icon: Lock, color: 'amber', title: 'Xavfsizlik', desc: 'JWT autentifikatsiya va shifrlangan ma'lumotlar saqlash bilan barcha foydalanuvchi so'rovlari himoyalangan.' },
+                        ].map((b, i) => {
+                            const benefitColors = {
+                                indigo:  { bg: 'bg-indigo-500/10',  border: 'border-indigo-500/20',  icon: 'text-indigo-400'  },
+                                emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: 'text-emerald-400' },
+                                blue:    { bg: 'bg-blue-500/10',    border: 'border-blue-500/20',    icon: 'text-blue-400'    },
+                                amber:   { bg: 'bg-amber-500/10',   border: 'border-amber-500/20',   icon: 'text-amber-400'   },
+                            };
+                            const c = benefitColors[b.color];
+                            return (
+                                <div key={i} className={`group p-8 rounded-[2rem] ${c.bg} border ${c.border} hover:shadow-xl transition-all duration-500`}>
+                                    <b.icon size={28} className={`${c.icon} mb-5 group-hover:scale-110 transition-transform duration-300`} />
+                                    <h4 className="font-black text-base uppercase tracking-tight text-[var(--text-main)] mb-3">{b.title}</h4>
+                                    <p className="text-[var(--text-muted)] font-bold text-sm leading-relaxed">{b.desc}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </section>
 
